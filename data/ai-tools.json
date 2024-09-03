@@ -1,0 +1,39 @@
+[
+  {
+    "id": "1",
+    "name": "ChatGPT",
+    "description": "OpenAI开发的大型语言模型,可以进行自然语言对话和完成各种文本任务。",
+    "iconUrl": "/icons/placeholder.svg",
+    "category": "文本生成",
+    "url": "https://chat.openai.com",
+    "ratings": [4, 5, 3],
+    "comments": [
+      {
+        "id": "1",
+        "userId": "user_123",
+        "content": "非常强大的AI工具,回答问题很准确!",
+        "createdAt": "2023-05-01T12:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Midjourney",
+    "description": "AI驱动的图像生成工具,可以根据文本描述创建高质量的艺术作品。",
+    "iconUrl": "/icons/placeholder.svg",
+    "category": "图像生成",
+    "url": "https://www.midjourney.com",
+    "ratings": [],
+    "comments": []
+  },
+  {
+    "id": "3",
+    "name": "Descript",
+    "description": "AI驱动的音频和视频编辑工具,可以轻松进行转录、编辑和合成。",
+    "iconUrl": "/icons/placeholder.svg",
+    "category": "音频处理",
+    "url": "https://www.descript.com",
+    "ratings": [],
+    "comments": []
+  }
+]
