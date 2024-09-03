@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { NextAuthProvider } from "./providers";
-
-const inter = Inter({ subsets: ["latin"] });
+import { Providers } from "../components/Providers";
 
 export const metadata: Metadata = {
   title: "AI工具导航",
@@ -17,8 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh">
-      <body className={inter.className}>
-        <NextAuthProvider>{children}</NextAuthProvider>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

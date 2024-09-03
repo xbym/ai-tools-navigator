@@ -1,11 +1,10 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
+import bcrypt from 'bcryptjs';
+import { JWT } from 'next-auth/jwt'
 
-// 这里应该是你的数据库连接
-// import { db } from '../../../lib/db'
-
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -18,10 +17,8 @@ export default NextAuth({
           return null
         }
 
-        // 查找用户
-        // const user = await db.user.findUnique({ where: { email: credentials.email } })
         // 模拟用户
-        const user = { id: '1', email: credentials.email, password: await hash('password', 12) }
+        const user = { id: '1', email: credentials.email, password: await bcrypt.hash('password', 10) }
 
         if (!user) {
           return null
@@ -38,5 +35,23 @@ export default NextAuth({
       }
     })
   ],
-  // ... 其他配置
-})
+  pages: {
+    signIn: '/auth/signin',
+  },
+  callbacks: {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+    async session({ session, token }: { session: any; token: JWT }) {
+      if (session.user) {
+        session.user.id = token.id as string
+      }
+      return session
+    }
+  }
+}
+
+export default NextAuth(authOptions)
