@@ -14,7 +14,8 @@
         "content": "非常强大的AI工具,回答问题很准确!",
         "createdAt": "2023-05-01T12:00:00Z"
       }
-    ]
+    ],
+    "tags": ["对话", "自然语言处理", "问答系统"]
   },
   {
     "id": "2",
@@ -24,7 +25,8 @@
     "category": "图像生成",
     "url": "https://www.midjourney.com",
     "ratings": [],
-    "comments": []
+    "comments": [],
+    "tags": ["图像生成", "艺术", "创作"]
   },
   {
     "id": "3",
@@ -34,6 +36,7 @@
     "category": "音频处理",
     "url": "https://www.descript.com",
     "ratings": [],
-    "comments": []
+    "comments": [],
+    "tags": ["音频处理", "视频编辑", "AI编辑"]
   }
 ]

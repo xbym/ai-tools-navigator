@@ -7,6 +7,7 @@ export interface AITool {
   url: string;
   ratings: number[];
   comments: Comment[];
+  tags: string[]; // 新增的标签字段
 }
 
 export interface Comment {
