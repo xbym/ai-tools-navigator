@@ -8,20 +8,58 @@ import Head from 'next/head';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
   const [tool, setTool] = React.useState<AITool | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchTool = async () => {
-      const response = await fetch(`/api/tools/${params.id}`);
-      const data = await response.json();
-      setTool(data);
+      try {
+        console.log('Fetching tool with ID:', params.id);
+        const response = await fetch(`/api/tools/${params.id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Received tool data:', data);
+        setTool(data);
+      } catch (err) {
+        console.error('Error fetching tool:', err);
+        setError(`Error loading tool: ${err.message}`);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchTool();
   }, [params.id]);
 
+  if (isLoading) {
+    return (
+      <Layout title="加载中... - AI工具导航" description="加载AI工具详情">
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout title="错误 - AI工具导航" description="加载AI工具详情时出错">
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-red-500 text-xl">{error}</div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!tool) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-    </div>;
+    return (
+      <Layout title="未找到 - AI工具导航" description="未找到请求的AI工具">
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-gray-500 text-xl">未找到请求的工具</div>
+        </div>
+      </Layout>
+    );
   }
 
   const schemaData = {
