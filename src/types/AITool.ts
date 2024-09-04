@@ -2,12 +2,12 @@ export interface AITool {
   _id: string;
   name: string;
   description: string;
-  iconUrl: string;
   category: string;
   url: string;
-  ratings: number[];
+  tags: string[] | string;  // 允许 tags 是字符串数组或字符串
+  iconUrl: string;
+  screenshotUrl?: string;
   comments: Comment[];
-  tags: string[];
 }
 
 export interface Comment {

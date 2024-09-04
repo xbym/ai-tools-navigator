@@ -4,6 +4,7 @@ const AIToolSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   iconUrl: { type: String, required: true },
+  screenshotUrl: { type: String }, // 添加这行
   category: { type: String, required: true },
   url: { type: String, required: true },
   ratings: [Number],

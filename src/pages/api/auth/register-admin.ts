@@ -1,14 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSession } from 'next-auth/react'
 import dbConnect from '../../../lib/dbConnect'
-import User from '../../../models/User' // 需要创建 User 模型
+import User from '../../../models/User'
 import bcrypt from 'bcryptjs'
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
+  }
+
+  const session = await getSession({ req })
+  if (!session || session.user.role !== 'admin') {
+    return res.status(401).json({ message: 'Unauthorized' })
   }
 
   await dbConnect()
@@ -26,10 +29,10 @@ export default async function handler(
       username,
       email,
       password: hashedPassword,
-      role: 'user' // 默认角色为普通用户
+      role: 'admin'
     })
 
-    res.status(201).json({ message: '注册成功', user: { id: user._id, username: user.username, email: user.email, role: user.role } })
+    res.status(201).json({ message: '管理员注册成功', user: { id: user._id, username: user.username, email: user.email, role: user.role } })
   } catch (error) {
     console.error('注册错误:', error)
     res.status(500).json({ message: '注册过程中出现错误' })

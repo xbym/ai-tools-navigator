@@ -1,36 +1,24 @@
-import Meta from '../components/Meta';
-import dynamic from 'next/dynamic';
-import Script from 'next/script';
-
-const AIToolListWrapperClient = dynamic(
-  () => import('../components/AIToolListWrapper'),
-  { ssr: false }
-);
+import AIToolListWrapper from '../components/AIToolListWrapper';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <>
-      <Meta 
-        title="AI导航站 - 发现最佳AI工具"
-        description="探索和发现最新、最强大的AI工具。我们的AI导航站为您提供全面的AI工具列表，帮助您提高工作效率。"
-        keywords="AI工具, 人工智能, 导航站, 效率工具, 机器学习"
-      />
-      <Script id="structured-data" type="application/ld+json">
-        {`
-          {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "AI导航站",
-            "description": "探索和发现最新、最强大的AI工具",
-            "url": "https://your-domain.com"
-          }
-        `}
-      </Script>
-      <main className="flex min-h-screen flex-col items-center py-8 px-4">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-8 text-center">AI导航站</h1>
-        <p className="text-lg sm:text-xl mb-6 sm:mb-8 text-center">欢迎来到AI工具导航</p>
-        <AIToolListWrapperClient />
-      </main>
-    </>
-  )
+    <div className="container mx-auto px-4 py-8">
+      <header className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4 text-blue-400">AI工具导航</h1>
+        <p className="text-xl text-gray-400">发现和探索最新最酷的AI工具</p>
+      </header>
+      
+      <div>
+        <h2 className="text-2xl font-semibold mb-4 text-blue-300">所有工具</h2>
+        <AIToolListWrapper />
+      </div>
+      
+      <div className="mt-12 text-center">
+        <Link href="/submit-tool" className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300">
+          提交新工具
+        </Link>
+      </div>
+    </div>
+  );
 }

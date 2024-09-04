@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "../components/Providers";
+import Layout from "../components/Layout";
 
 export const metadata: Metadata = {
   title: "AI工具导航",
@@ -13,9 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh">
-      <body>
-        <Providers>{children}</Providers>
+    <html lang="zh" className="dark">
+      <body className="bg-gray-900 text-gray-100">
+        <Providers>
+          <Layout>{children}</Layout>
+        </Providers>
       </body>
     </html>
   );

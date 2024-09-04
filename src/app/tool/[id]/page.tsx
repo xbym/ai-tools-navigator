@@ -1,99 +1,90 @@
 "use client";
 
-import { notFound } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useState } from 'react';
-import { useSession } from "next-auth/react";
-import aiToolsData from '../../../../data/ai-tools.json';
-import { AITool, Comment } from '../../../types/AITool';
+import { useSession } from 'next-auth/react';
+import { AITool } from '../../../types/AITool';
 import Comments from '../../../components/Comments';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
+  const [tool, setTool] = useState<AITool | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const { data: session } = useSession();
-  const [tool, setTool] = useState<AITool | undefined>(() => {
-    const foundTool = aiToolsData.find((t) => t.id === params.id);
-    return foundTool ? foundTool as AITool : undefined;
-  });
 
-  if (!tool) {
-    notFound();
+  useEffect(() => {
+    fetchTool();
+  }, [params.id]);
+
+  const fetchTool = async () => {
+    try {
+      const response = await fetch(`/api/tools/${params.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTool(data);
+      } else {
+        setError('Failed to fetch tool');
+      }
+    } catch (error) {
+      setError('Error fetching tool');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-blue-400">加载中...</div>;
   }
 
-  const averageRating = tool.ratings.length > 0
-    ? tool.ratings.reduce((a, b) => a + b, 0) / tool.ratings.length
-    : 0;
-
-  const handleAddComment = (content: string) => {
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      userId: 'user_' + Math.random().toString(36).substr(2, 9),
-      content,
-      createdAt: new Date().toISOString(),
-    };
-    setTool({
-      ...tool,
-      comments: [...tool.comments, newComment],
-    });
-  };
-
-  const handleAddRating = (rating: number) => {
-    setTool({
-      ...tool,
-      ratings: [...tool.ratings, rating],
-    });
-  };
+  if (error || !tool) {
+    return <div className="text-center py-8 text-red-400">{error || '工具不存在'}</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <Link href="/" className="text-primary hover:underline mb-4 inline-block">
-        &larr; 返回首页
-      </Link>
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <div className="flex items-center mb-4">
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+        <div className="flex items-center mb-6">
           <Image
             src={tool.iconUrl}
             alt={tool.name}
-            width={60}
-            height={60}
+            width={80}
+            height={80}
             className="rounded-full mr-4"
           />
-          <h1 className="text-2xl font-bold">{tool.name}</h1>
+          <h1 className="text-3xl font-bold text-blue-400">{tool.name}</h1>
         </div>
-        <p className="text-gray-600 mb-4">{tool.description}</p>
-        <div className="mb-4">
-          <span className="bg-secondary text-xs font-semibold px-2 py-1 rounded">
+        <p className="text-gray-300 mb-4">{tool.description}</p>
+        {tool.screenshotUrl && (
+          <Image
+            src={tool.screenshotUrl}
+            alt={`${tool.name} screenshot`}
+            width={800}
+            height={450}
+            className="rounded-lg mb-4 w-full h-auto"
+          />
+        )}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {Array.isArray(tool.tags) && tool.tags.map((tag) => (
+            <span key={tag} className="bg-blue-900 text-blue-200 text-xs font-semibold px-2.5 py-0.5 rounded">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="flex justify-between items-center mb-6">
+          <span className="bg-gray-700 text-gray-300 text-sm font-semibold px-2.5 py-0.5 rounded">
             {tool.category}
           </span>
+          <a
+            href={tool.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+          >
+            访问网站
+          </a>
         </div>
-        <div className="mb-4">
-          <p className="text-lg font-semibold">平均评分: {averageRating.toFixed(1)}/5</p>
-          {session ? (
-            <div className="flex mt-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => handleAddRating(star)}
-                  className={`text-2xl ${star <= averageRating ? 'text-yellow-400' : 'text-gray-300'}`}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">登录后可以进行评分</p>
-          )}
-        </div>
-        <a
-          href={tool.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
-        >
-          访问网站
-        </a>
+        <Comments comments={tool.comments} toolId={tool._id} isLoggedIn={!!session} />
       </div>
-      <Comments comments={tool.comments} onAddComment={handleAddComment} isLoggedIn={!!session} />
     </div>
   );
 }
