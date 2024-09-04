@@ -1,6 +1,8 @@
 "use client";
 
 import React, { ErrorInfo, ReactNode } from 'react';
+import * as Sentry from "@sentry/nextjs";
+import { logClientError } from '@/lib/clientErrorLogger';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -21,9 +23,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    // 这里可以添加错误报告逻辑
+    logClientError(error, window.location.href);
+    this.setState({ hasError: true, error });
   }
 
   render() {
