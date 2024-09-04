@@ -1,5 +1,5 @@
 export interface AITool {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   iconUrl: string;
@@ -7,11 +7,11 @@ export interface AITool {
   url: string;
   ratings: number[];
   comments: Comment[];
-  tags: string[]; // 新增的标签字段
+  tags: string[];
 }
 
 export interface Comment {
-  id: string;
+  _id: string;
   userId: string;
   content: string;
   createdAt: string;
