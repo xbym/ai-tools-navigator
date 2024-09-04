@@ -2,12 +2,13 @@
 
 import AIToolList from './AIToolList';
 import { useState, useEffect } from 'react';
-import { AITool } from '../types/AITool';
+import { AITool } from '@/types/AITool';
 
 export default function AIToolListWrapper() {
   const [tools, setTools] = useState<AITool[]>([]);
+  const [filteredTools, setFilteredTools] = useState<AITool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
@@ -19,26 +20,29 @@ export default function AIToolListWrapper() {
   const fetchTools = async () => {
     try {
       const response = await fetch('/api/tools');
-      if (response.ok) {
-        const data = await response.json();
-        setTools(data.tools); // 注意这里的变化
-        setIsLoading(false);
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to fetch tools');
       }
+      const data = await response.json();
+      setTools(data.tools);
+      setFilteredTools(data.tools);
     } catch (error) {
-      setError('Error fetching tools');
+      setError('Error fetching tools. Please try again later.');
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredTools = tools.filter((tool) => {
-    const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          tool.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
-    const matchesTag = selectedTag ? tool.tags.includes(selectedTag) : true;
-    return matchesSearch && matchesCategory && matchesTag;
-  });
+  useEffect(() => {
+    const filtered = tools.filter((tool) => {
+      const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            tool.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === '' || tool.category === selectedCategory;
+      const matchesTag = selectedTag === '' || tool.tags.includes(selectedTag);
+      return matchesSearch && matchesCategory && matchesTag;
+    });
+    setFilteredTools(filtered);
+  }, [searchTerm, selectedCategory, selectedTag, tools]);
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
   const tags = Array.from(new Set(tools.flatMap((tool) => tool.tags)));
@@ -53,7 +57,7 @@ export default function AIToolListWrapper() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-wrap gap-4">
+      <div className="mb-8 flex flex-col md:flex-row gap-4">
         <input
           type="text"
           placeholder="搜索工具..."
