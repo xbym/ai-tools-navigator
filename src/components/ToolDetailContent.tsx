@@ -16,7 +16,6 @@ export default function ToolDetailContent({ id }: ToolDetailContentProps) {
   useEffect(() => {
     const fetchTool = async () => {
       try {
-        console.log(`Fetching tool with id: ${id}`);
         const response = await fetch(`/api/tools/${id}`);
         if (!response.ok) {
           if (response.status === 404) {
@@ -25,7 +24,6 @@ export default function ToolDetailContent({ id }: ToolDetailContentProps) {
           throw new Error('Failed to fetch tool');
         }
         const data = await response.json();
-        console.log(`Tool data received:`, data);
         setTool(data);
       } catch (err) {
         console.error('Error fetching tool:', err);
