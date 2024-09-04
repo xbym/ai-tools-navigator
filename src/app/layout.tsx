@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NextAuthProvider } from "./providers";
+import dynamic from 'next/dynamic';
+
+const ClientErrorBoundary = dynamic(() => import('@/components/ErrorBoundary'), { ssr: false });
 
 export const metadata: Metadata = {
   title: "AI工具导航",
@@ -15,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body>
-        <NextAuthProvider>{children}</NextAuthProvider>
+        <ClientErrorBoundary>
+          <NextAuthProvider>{children}</NextAuthProvider>
+        </ClientErrorBoundary>
       </body>
     </html>
   );

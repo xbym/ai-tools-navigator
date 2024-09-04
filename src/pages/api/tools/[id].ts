@@ -19,8 +19,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ message: 'Tool not found' })
     }
     res.status(200).json(tool)
-  } catch (error) {
-    console.error('Error in /api/tools/[id]:', error)
-    res.status(500).json({ message: 'Error fetching tool', error: error.message })
+  } catch (error: unknown) {
+    console.error('Error fetching tool:', error);
+    res.status(500).json({ 
+      message: 'Error fetching tool', 
+      error: error instanceof Error ? error.message : String(error) 
+    });
   }
 }

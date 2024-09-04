@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Layout from '@/components/Layout';
 import { AITool } from '@/types/AITool';
 import Head from 'next/head';
+import { NextPage } from 'next';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
   const [tool, setTool] = React.useState<AITool | null>(null);
@@ -22,9 +23,15 @@ export default function ToolDetail({ params }: { params: { id: string } }) {
         const data = await response.json();
         console.log('Received tool data:', data);
         setTool(data);
-      } catch (err) {
-        console.error('Error fetching tool:', err);
-        setError(`Error loading tool: ${err.message}`);
+      } catch (err: unknown) {
+        console.error('Error fetching tool details:', err);
+        return (
+          <div>
+            <h1>Error</h1>
+            <p>Failed to load tool details. Please try again later.</p>
+            <p>{err instanceof Error ? err.message : String(err)}</p>
+          </div>
+        );
       } finally {
         setIsLoading(false);
       }
