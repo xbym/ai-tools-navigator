@@ -4,10 +4,13 @@ export interface AITool {
   description: string;
   category: string;
   url: string;
-  tags: string[] | string;  // 允许 tags 是字符串数组或字符串
+  tags: string[];
   iconUrl: string;
   screenshotUrl?: string;
   comments: Comment[];
+  ratings: Rating[];
+  averageRating: number;
+  viewCount: number;
 }
 
 export interface Comment {
@@ -15,4 +18,9 @@ export interface Comment {
   userId: string;
   content: string;
   createdAt: string;
+}
+
+export interface Rating {
+  userId: string;
+  score: number;
 }

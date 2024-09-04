@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../lib/dbConnect'
 import User from '../../../models/User'
-import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { sendResetPasswordEmail } from '../../../lib/email'
+import bcrypt from 'bcryptjs'
 
 export default async function handler(
   req: NextApiRequest,

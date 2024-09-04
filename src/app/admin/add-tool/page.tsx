@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CldUploadWidget } from 'next-cloudinary';
+import ImageUpload from '../../../components/ImageUpload';
 
 export default function AddToolPage() {
   const router = useRouter();
@@ -43,6 +43,14 @@ export default function AddToolPage() {
     } catch (error) {
       console.error('Error adding tool:', error);
     }
+  };
+
+  const handleIconUpload = (url: string) => {
+    setToolData(prev => ({ ...prev, iconUrl: url }));
+  };
+
+  const handleScreenshotUpload = (url: string) => {
+    setToolData(prev => ({ ...prev, screenshotUrl: url }));
   };
 
   return (
@@ -108,35 +116,13 @@ export default function AddToolPage() {
           />
         </div>
         <div>
-          <label htmlFor="iconUrl" className="block mb-1">图标 URL</label>
-          <CldUploadWidget
-            uploadPreset="ai_tools"
-            onUpload={(result: any) => {
-              setToolData(prev => ({ ...prev, iconUrl: result.info.secure_url }));
-            }}
-          >
-            {({ open }) => (
-              <button type="button" onClick={() => open()} className="bg-blue-500 text-white px-4 py-2 rounded">
-                上传图标
-              </button>
-            )}
-          </CldUploadWidget>
+          <label htmlFor="iconUrl" className="block mb-1">图标</label>
+          <ImageUpload onUpload={handleIconUpload} />
           {toolData.iconUrl && <img src={toolData.iconUrl} alt="Icon preview" className="mt-2 w-16 h-16" />}
         </div>
         <div>
-          <label htmlFor="screenshotUrl" className="block mb-1">截图 URL</label>
-          <CldUploadWidget
-            uploadPreset="ai_tools"
-            onUpload={(result: any) => {
-              setToolData(prev => ({ ...prev, screenshotUrl: result.info.secure_url }));
-            }}
-          >
-            {({ open }) => (
-              <button type="button" onClick={() => open()} className="bg-blue-500 text-white px-4 py-2 rounded">
-                上传截图
-              </button>
-            )}
-          </CldUploadWidget>
+          <label htmlFor="screenshotUrl" className="block mb-1">截图</label>
+          <ImageUpload onUpload={handleScreenshotUpload} />
           {toolData.screenshotUrl && <img src={toolData.screenshotUrl} alt="Screenshot preview" className="mt-2 w-64" />}
         </div>
         <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">

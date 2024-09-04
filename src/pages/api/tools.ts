@@ -9,9 +9,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const session = await getSession({ req });
 
   if (req.method === 'GET') {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const searchTerm = req.query.search as string;
+    let query = {};
+    if (searchTerm) {
+      query = { $text: { $search: searchTerm } };
+    }
+
     try {
-      const tools = await AITool.find({});
-      res.status(200).json(tools);
+      const tools = await AITool.find(query).skip(skip).limit(limit);
+      const total = await AITool.countDocuments(query);
+      res.status(200).json({
+        tools, // 这里确保返回的是一个包含 tools 数组的对象
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total
+      });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch AI tools' });
     }

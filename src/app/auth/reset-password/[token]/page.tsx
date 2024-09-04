@@ -16,7 +16,7 @@ export default function ResetPassword({ params }: { params: { token: string } })
     setMessage('');
 
     if (password !== confirmPassword) {
-      setError('密码不匹配');
+      setError('两次输入的密码不一致');
       return;
     }
 
@@ -30,7 +30,7 @@ export default function ResetPassword({ params }: { params: { token: string } })
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('密码重置成功');
+        setMessage(data.message);
         setTimeout(() => router.push('/auth/signin'), 3000);
       } else {
         setError(data.message || '重置密码失败');

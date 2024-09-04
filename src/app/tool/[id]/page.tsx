@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import CommentAndRating from '../../../components/CommentAndRating';
 import { AITool } from '../../../types/AITool';
-import Comments from '../../../components/Comments';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
   const [tool, setTool] = useState<AITool | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { data: session } = useSession();
 
   useEffect(() => {
     fetchTool();
@@ -50,40 +48,40 @@ export default function ToolDetail({ params }: { params: { id: string } }) {
             width={80}
             height={80}
             className="rounded-full mr-4"
+            loading="eager"
           />
           <h1 className="text-3xl font-bold text-blue-400">{tool.name}</h1>
         </div>
         <p className="text-gray-300 mb-4">{tool.description}</p>
-        {tool.screenshotUrl && (
-          <Image
-            src={tool.screenshotUrl}
-            alt={`${tool.name} screenshot`}
-            width={800}
-            height={450}
-            className="rounded-lg mb-4 w-full h-auto"
-          />
-        )}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {Array.isArray(tool.tags) && tool.tags.map((tag) => (
-            <span key={tag} className="bg-blue-900 text-blue-200 text-xs font-semibold px-2.5 py-0.5 rounded">
+        <div className="mb-4">
+          <span className="bg-gray-700 text-gray-300 text-xs font-semibold px-2.5 py-0.5 rounded mr-2">
+            {tool.category}
+          </span>
+          {tool.tags.map((tag) => (
+            <span key={tag} className="bg-blue-900 text-blue-200 text-xs font-semibold px-2.5 py-0.5 rounded mr-2">
               {tag}
             </span>
           ))}
         </div>
-        <div className="flex justify-between items-center mb-6">
-          <span className="bg-gray-700 text-gray-300 text-sm font-semibold px-2.5 py-0.5 rounded">
-            {tool.category}
-          </span>
-          <a
-            href={tool.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
-          >
-            访问网站
-          </a>
-        </div>
-        <Comments comments={tool.comments} toolId={tool._id} isLoggedIn={!!session} />
+        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+          访问网站
+        </a>
+        {tool.screenshotUrl && (
+          <div className="mt-6">
+            <Image
+              src={tool.screenshotUrl}
+              alt={`${tool.name} 截图`}
+              width={800}
+              height={450}
+              className="rounded-lg"
+              loading="lazy"
+            />
+          </div>
+        )}
+        <CommentAndRating
+          toolId={tool._id}
+          currentRating={tool.averageRating}
+        />
       </div>
     </div>
   );

@@ -12,6 +12,9 @@ export default function AdminPage() {
   const [tools, setTools] = useState<AITool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -19,14 +22,15 @@ export default function AdminPage() {
     } else if (status === 'authenticated') {
       fetchTools();
     }
-  }, [status, router]);
+  }, [status, router, currentPage, searchTerm]);
 
   const fetchTools = async () => {
     try {
-      const response = await fetch('/api/tools');
+      const response = await fetch(`/api/tools?page=${currentPage}&limit=10&search=${searchTerm}`);
       if (response.ok) {
         const data = await response.json();
-        setTools(data);
+        setTools(data.tools);
+        setTotalPages(data.totalPages);
       } else {
         setError('Failed to fetch tools');
       }
@@ -38,7 +42,7 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this tool?')) {
+    if (confirm('确定要删除这个工具吗？')) {
       try {
         const response = await fetch(`/api/tools/${id}`, {
           method: 'DELETE',
@@ -46,10 +50,10 @@ export default function AdminPage() {
         if (response.ok) {
           setTools(tools.filter(tool => tool._id !== id));
         } else {
-          setError('Failed to delete tool');
+          console.error('删除工具失败');
         }
       } catch (error) {
-        setError('Error deleting tool');
+        console.error('删除工具时出错:', error);
       }
     }
   };
@@ -73,11 +77,26 @@ export default function AdminPage() {
           注册新管理员
         </Link>
       </div>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="搜索工具..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="p-2 border rounded mr-2"
+        />
+        <button onClick={() => setCurrentPage(1)} className="bg-blue-500 text-white p-2 rounded">
+          搜索
+        </button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tools.map((tool) => (
           <div key={tool._id} className="bg-gray-800 rounded-lg shadow-md p-4">
             <h2 className="text-xl font-semibold text-blue-300 mb-2">{tool.name}</h2>
             <p className="text-gray-400 mb-4 h-12 overflow-hidden">{tool.description}</p>
+            <div className="text-sm text-gray-500 mb-2">
+              访问次数: {tool.viewCount}
+            </div>
             <div className="flex justify-between items-center">
               <Link href={`/admin/edit-tool/${tool._id}`} className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition duration-300">
                 编辑
@@ -90,6 +109,17 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
+        ))}
+      </div>
+      <div className="mt-6 flex justify-center space-x-2">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            {page}
+          </button>
         ))}
       </div>
     </div>

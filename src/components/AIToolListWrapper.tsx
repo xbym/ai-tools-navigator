@@ -21,13 +21,13 @@ export default function AIToolListWrapper() {
       const response = await fetch('/api/tools');
       if (response.ok) {
         const data = await response.json();
-        setTools(data);
+        setTools(data.tools); // 注意这里的变化
+        setIsLoading(false);
       } else {
-        setError('Failed to fetch tools');
+        throw new Error('Failed to fetch tools');
       }
     } catch (error) {
       setError('Error fetching tools');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -36,12 +36,12 @@ export default function AIToolListWrapper() {
     const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           tool.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
-    const matchesTag = selectedTag ? (Array.isArray(tool.tags) && tool.tags.includes(selectedTag)) : true;
+    const matchesTag = selectedTag ? tool.tags.includes(selectedTag) : true;
     return matchesSearch && matchesCategory && matchesTag;
   });
 
   const categories = Array.from(new Set(tools.map((tool) => tool.category)));
-  const tags = Array.from(new Set(tools.flatMap((tool) => Array.isArray(tool.tags) ? tool.tags : [])));
+  const tags = Array.from(new Set(tools.flatMap((tool) => tool.tags)));
 
   if (isLoading) {
     return <div className="text-center py-8 text-blue-400">加载中...</div>;
