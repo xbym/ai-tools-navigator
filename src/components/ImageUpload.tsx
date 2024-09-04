@@ -1,10 +1,22 @@
 import { CldUploadWidget } from 'next-cloudinary';
+import { useEffect, useState } from 'react';
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
 }
 
 export default function ImageUpload({ onUpload }: ImageUploadProps) {
+  const [cloudName, setCloudName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setCloudName(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
+    console.log('Cloudinary Cloud Name:', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
+  }, []);
+
+  if (!cloudName) {
+    return <div>Loading Cloudinary configuration...</div>;
+  }
+
   return (
     <CldUploadWidget
       uploadPreset="ai_tools_navigator"

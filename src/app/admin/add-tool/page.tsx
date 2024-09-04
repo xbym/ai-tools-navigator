@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from '../../../components/ImageUpload';
+import Image from 'next/image';
 
 export default function AddToolPage() {
   const router = useRouter();
@@ -118,12 +119,28 @@ export default function AddToolPage() {
         <div>
           <label htmlFor="iconUrl" className="block mb-1">图标</label>
           <ImageUpload onUpload={handleIconUpload} />
-          {toolData.iconUrl && <img src={toolData.iconUrl} alt="Icon preview" className="mt-2 w-16 h-16" />}
+          {toolData.iconUrl && (
+            <Image
+              src={toolData.iconUrl}
+              alt="Tool Icon"
+              width={64}
+              height={64}
+              className="mt-2 h-16 w-16 object-cover rounded-full"
+            />
+          )}
         </div>
         <div>
           <label htmlFor="screenshotUrl" className="block mb-1">截图</label>
           <ImageUpload onUpload={handleScreenshotUpload} />
-          {toolData.screenshotUrl && <img src={toolData.screenshotUrl} alt="Screenshot preview" className="mt-2 w-64" />}
+          {toolData.screenshotUrl && (
+            <Image
+              src={toolData.screenshotUrl}
+              alt="Tool Screenshot"
+              width={800}
+              height={450}
+              className="mt-2 w-full object-cover rounded"
+            />
+          )}
         </div>
         <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
           添加工具

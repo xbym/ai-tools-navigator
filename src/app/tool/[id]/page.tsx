@@ -2,40 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import CommentAndRating from '../../../components/CommentAndRating';
 import { AITool } from '../../../types/AITool';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
   const [tool, setTool] = useState<AITool | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
+    const fetchTool = async () => {
+      const response = await fetch(`/api/tools/${params.id}`);
+      const data = await response.json();
+      setTool(data);
+    };
     fetchTool();
   }, [params.id]);
 
-  const fetchTool = async () => {
-    try {
-      const response = await fetch(`/api/tools/${params.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTool(data);
-      } else {
-        setError('Failed to fetch tool');
-      }
-    } catch (error) {
-      setError('Error fetching tool');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return <div className="text-center py-8 text-blue-400">加载中...</div>;
-  }
-
-  if (error || !tool) {
-    return <div className="text-center py-8 text-red-400">{error || '工具不存在'}</div>;
+  if (!tool) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -78,10 +60,6 @@ export default function ToolDetail({ params }: { params: { id: string } }) {
             />
           </div>
         )}
-        <CommentAndRating
-          toolId={tool._id}
-          currentRating={tool.averageRating}
-        />
       </div>
     </div>
   );

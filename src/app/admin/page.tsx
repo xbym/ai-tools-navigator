@@ -1,14 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { AITool } from '../../types/AITool';
 
 export default function AdminPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [tools, setTools] = useState<AITool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,15 +12,7 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    } else if (status === 'authenticated') {
-      fetchTools();
-    }
-  }, [status, router, currentPage, searchTerm]);
-
-  const fetchTools = async () => {
+  const fetchTools = useCallback(async () => {
     try {
       const response = await fetch(`/api/tools?page=${currentPage}&limit=10&search=${searchTerm}`);
       if (response.ok) {
@@ -39,7 +27,11 @@ export default function AdminPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, searchTerm]);
+
+  useEffect(() => {
+    fetchTools();
+  }, [fetchTools]);
 
   const handleDelete = async (id: string) => {
     if (confirm('确定要删除这个工具吗？')) {
@@ -72,9 +64,6 @@ export default function AdminPage() {
       <div className="mb-6 space-x-4">
         <Link href="/admin/add-tool" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 inline-block">
           添加新工具
-        </Link>
-        <Link href="/admin/register" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300 inline-block">
-          注册新管理员
         </Link>
       </div>
       <div className="mb-4">
@@ -109,17 +98,6 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-        ))}
-      </div>
-      <div className="mt-6 flex justify-center space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => setCurrentPage(page)}
-            className={`px-3 py-1 rounded ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            {page}
-          </button>
         ))}
       </div>
     </div>

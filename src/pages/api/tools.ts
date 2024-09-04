@@ -1,12 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../lib/dbConnect'
 import AITool from '../../models/AITool'
-import { getSession } from 'next-auth/react'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
-
-  const session = await getSession({ req });
 
   if (req.method === 'GET') {
     const page = parseInt(req.query.page as string) || 1;
@@ -23,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const tools = await AITool.find(query).skip(skip).limit(limit);
       const total = await AITool.countDocuments(query);
       res.status(200).json({
-        tools, // 这里确保返回的是一个包含 tools 数组的对象
+        tools,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
         totalItems: total
@@ -32,10 +29,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ error: 'Failed to fetch AI tools' });
     }
   } else if (req.method === 'POST') {
-    if (!session) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     try {
       const tool = await AITool.create(req.body);
       res.status(201).json(tool);

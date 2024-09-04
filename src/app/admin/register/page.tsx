@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 
 export default function AdminRegister() {
   const [username, setUsername] = useState('');
@@ -10,13 +9,6 @@ export default function AdminRegister() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { data: session } = useSession();
-
-  // 检查当前用户是否为管理员
-  if (!session || session.user.role !== 'admin') {
-    router.push('/auth/signin');
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,40 +36,43 @@ export default function AdminRegister() {
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">用户名</label>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-300">用户名</label>
           <input
             type="text"
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">邮箱</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300">邮箱</label>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">密码</label>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-300">密码</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
           />
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
-          注册管理员
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+        >
+          注册
         </button>
       </form>
     </div>

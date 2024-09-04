@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "../components/Providers";
-import Layout from "../components/Layout";
+import { NextAuthProvider } from "./providers";
 
 export const metadata: Metadata = {
   title: "AI工具导航",
@@ -16,9 +15,7 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body>
-        <Providers>
-          <Layout>{children}</Layout>
-        </Providers>
+        <NextAuthProvider>{children}</NextAuthProvider>
       </body>
     </html>
   );
