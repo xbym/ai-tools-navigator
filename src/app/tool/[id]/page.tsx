@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { AITool } from '../../../types/AITool';
+import Layout from '@/components/Layout';
+import { AITool } from '@/types/AITool';
+import Head from 'next/head';
 
 export default function ToolDetail({ params }: { params: { id: string } }) {
-  const [tool, setTool] = useState<AITool | null>(null);
+  const [tool, setTool] = React.useState<AITool | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchTool = async () => {
       const response = await fetch(`/api/tools/${params.id}`);
       const data = await response.json();
@@ -20,8 +22,29 @@ export default function ToolDetail({ params }: { params: { id: string } }) {
     return <div>Loading...</div>;
   }
 
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": tool.name,
+    "description": tool.description,
+    "applicationCategory": tool.category,
+    "operatingSystem": "Web",
+    "url": tool.url,
+    "image": tool.iconUrl,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": tool.averageRating,
+      "ratingCount": tool.ratings.length
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <Layout title={`${tool.name} - AI工具导航`} description={tool.description}>
+      <Head>
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData)}
+        </script>
+      </Head>
       <div className="bg-gray-800 rounded-lg shadow-lg p-6">
         <div className="flex items-center mb-6">
           <Image
@@ -61,6 +84,6 @@ export default function ToolDetail({ params }: { params: { id: string } }) {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 }
