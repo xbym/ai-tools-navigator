@@ -4,7 +4,7 @@ module.exports = {
   exclude: ['/admin', '/admin/*'],
   robotsTxtOptions: {
     additionalSitemaps: [
-      'https://your-domain.com/server-sitemap.xml', // 我们稍后会创建这个动态站点地图
+      'https://your-domain.com/api/sitemap.xml', // 更新这里
     ],
   },
 };
