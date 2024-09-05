@@ -1,5 +1,5 @@
 export function getPasswordResetEmailTemplate(resetUrl: string, username: string): string {
-  const logoUrl = 'https://your-logo-url.com/logo.png'; // 替换为你的实际 logo URL
+  const logoUrl = 'https://res.cloudinary.com/db2qyyfif/image/upload/v1725528563/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240905182906_e8qjr9.jpg'; // 替换为你的实际 logo URL
 
   return `
     <!DOCTYPE html>
