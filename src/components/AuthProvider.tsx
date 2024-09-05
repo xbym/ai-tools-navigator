@@ -11,6 +11,7 @@ export interface User {
 
 export interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -32,7 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // 实现登录逻辑
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -40,10 +40,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+        const { user, token } = await response.json();
+        setUser(user);
         setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', token);
       } else {
         throw new Error('Login failed');
       }
@@ -57,10 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

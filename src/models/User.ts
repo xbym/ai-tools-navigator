@@ -6,10 +6,8 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  lastPasswordReset: { type: Date, default: null },
-  resetToken: String,
-  resetTokenExpiry: Date,
-}, { timestamps: true });
+  // 其他字段...
+});
 
 // 在保存之前加密密码
 UserSchema.pre('save', async function(next) {

@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { withAdminAuth } from '@/middleware/authMiddleware';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { withRole } from '@/middleware/roleMiddleware';
 import User from '@/models/User';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,4 +16,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withAdminAuth(handler);
+export default withRole('admin')(handler);

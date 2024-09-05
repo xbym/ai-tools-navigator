@@ -20,6 +20,7 @@ export function withAuth(handler: any) {
       (req as any).user = user;
       return handler(req, res);
     } catch (error) {
+      console.error('Auth error:', error);
       return res.status(401).json({ message: '无效的认证令牌' });
     }
   };
