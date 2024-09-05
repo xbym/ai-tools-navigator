@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
@@ -16,56 +17,49 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (res.ok) {
-        const { accessToken, refreshToken } = await res.json();
-        login(accessToken, refreshToken);
-        router.push('/');
-      } else {
-        const data = await res.json();
-        setError(data.message || 'Login failed');
-      }
+      await login(email, password);
+      router.push('/');
     } catch (error) {
-      setError('An error occurred during login');
+      setError('登录失败，请检查您的邮箱和密码');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block mb-1">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded"
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="block mb-1">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded"
-          />
-        </div>
-        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
-          Login
-        </button>
-      </form>
-    </div>
+    <Layout title="登录 - AI工具导航">
+      <div className="max-w-md mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
+        <h1 className="text-2xl font-bold mb-6 text-white">登录</h1>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block mb-1 text-gray-300">邮箱</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block mb-1 text-gray-300">密码</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+          >
+            登录
+          </button>
+        </form>
+      </div>
+    </Layout>
   );
 }
