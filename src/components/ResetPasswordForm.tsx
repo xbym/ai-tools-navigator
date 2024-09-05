@@ -4,27 +4,32 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 import { checkPasswordStrength } from '@/utils/passwordUtils';
+import LoadingSpinner from './LoadingSpinner';
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       setError('密码不匹配');
+      setIsLoading(false);
       return;
     }
 
     const strength = checkPasswordStrength(password);
     if (strength < 3) {
       setError('密码强度不足,请选择更强的密码');
+      setIsLoading(false);
       return;
     }
 
@@ -48,6 +53,8 @@ export default function ResetPasswordForm() {
       }
     } catch (error) {
       setError('重置密码时出错');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,9 +87,10 @@ export default function ResetPasswordForm() {
       </div>
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+        disabled={isLoading}
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-blue-400"
       >
-        重置密码
+        {isLoading ? <LoadingSpinner /> : '重置密码'}
       </button>
     </form>
   );
