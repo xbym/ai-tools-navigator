@@ -1,3 +1,5 @@
+'use client';
+
 import { Suspense } from 'react';
 import Layout from '@/components/Layout';
 import AdminRegisterContent from '@/components/AdminRegisterContent';
