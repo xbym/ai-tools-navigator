@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
@@ -11,16 +11,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    if (!isAdmin()) {
-      showToast('您没有权限访问此页面', 'error');
-      router.push('/');
-    } else {
-      fetchUsers();
-    }
-  }, [isAdmin, router, showToast]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users', {
         headers: {
@@ -36,7 +27,16 @@ export default function AdminDashboard() {
     } catch (error) {
       showToast('获取用户列表时发生错误', 'error');
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (!isAdmin()) {
+      showToast('您没有权限访问此页面', 'error');
+      router.push('/');
+    } else {
+      fetchUsers();
+    }
+  }, [isAdmin, router, showToast, fetchUsers]);
 
   if (!isAdmin()) {
     return null;

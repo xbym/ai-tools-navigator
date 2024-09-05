@@ -1,5 +1,5 @@
 import { AuthProvider } from '@/components/AuthProvider';
-import { ToastProvider } from '@/contexts/ToastContext';
+import { LoadingProgress } from '@/components/LoadingProgress';
 import "./globals.css";
 
 export default function RootLayout({
@@ -11,9 +11,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <LoadingProgress />
+          {children}
         </AuthProvider>
       </body>
     </html>
