@@ -1,34 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
-import { useAuth } from '@/hooks/useAuth';
-import Link from 'next/link';  // 添加这行
 
-export default function Login() {
+export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage('');
     setError('');
 
     try {
-      await login(email, password);
-      router.push('/');
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setMessage('如果该邮箱存在，我们已发送密码重置链接。请检查您的邮箱。');
+      } else {
+        const data = await response.json();
+        setError(data.message || '发送重置链接时出错');
+      }
     } catch (error) {
-      setError('登录失败，请检查您的邮箱和密码');
+      setError('发送重置链接时出错');
     }
   };
 
   return (
-    <Layout title="登录 - AI工具导航">
+    <Layout title="忘记密码 - AI工具导航">
       <div className="max-w-md mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
-        <h1 className="text-2xl font-bold mb-6 text-white">登录</h1>
+        <h1 className="text-2xl font-bold mb-6 text-white">忘记密码</h1>
+        {message && <p className="text-green-500 mb-4">{message}</p>}
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -42,29 +49,13 @@ export default function Login() {
               className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block mb-1 text-gray-300">密码</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
           >
-            登录
+            发送重置链接
           </button>
         </form>
-        <div className="mt-4 text-center">
-          <Link href="/forgot-password" className="text-blue-400 hover:text-blue-300">
-            忘记密码？
-          </Link>
-        </div>
       </div>
     </Layout>
   );
