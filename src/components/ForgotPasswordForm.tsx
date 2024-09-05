@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { isValidEmail } from '@/utils/validationUtils';
 import LoadingSpinner from './LoadingSpinner';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +18,7 @@ export default function ForgotPasswordForm() {
     setMessage('');
 
     if (!isValidEmail(email)) {
-      setError('请输入有效的电子邮件地址');
+      showToast('请输入有效的电子邮件地址', 'error');
       return;
     }
 
@@ -30,13 +32,13 @@ export default function ForgotPasswordForm() {
       });
 
       if (response.ok) {
-        setMessage('如果该邮箱存在,我们已发送密码重置链接。请检查您的邮箱。');
+        showToast('如果该邮箱存在,我们已发送密码重置链接。请检查您的邮箱。', 'success');
       } else {
         const data = await response.json();
-        setError(data.message || '发送重置链接时出错');
+        showToast(data.message || '发送重置链接时出错', 'error');
       }
     } catch (error) {
-      setError('发送重置链接时出错');
+      showToast('发送重置链接时出错', 'error');
     } finally {
       setIsLoading(false);
     }
