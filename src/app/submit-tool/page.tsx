@@ -1,61 +1,69 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import ImageUpload from '@/components/ImageUpload';
 
-export default function SubmitToolPage() {
+export default function SubmitTool() {
   const router = useRouter();
   const [toolData, setToolData] = useState({
     name: '',
     description: '',
     category: '',
     url: '',
-    tags: '',
+    tags: [] as string[],
     iconUrl: '',
     screenshotUrl: '',
   });
+  const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setToolData({ ...toolData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setToolData(prevData => ({ ...prevData, [name]: value }));
+  };
+
+  const handleTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tags = e.target.value.split(',').map(tag => tag.trim());
+    setToolData(prevData => ({ ...prevData, tags }));
   };
 
   const handleIconUpload = (url: string) => {
-    setToolData({ ...toolData, iconUrl: url });
+    setToolData(prevData => ({ ...prevData, iconUrl: url }));
   };
 
   const handleScreenshotUpload = (url: string) => {
-    setToolData({ ...toolData, screenshotUrl: url });
+    setToolData(prevData => ({ ...prevData, screenshotUrl: url }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     try {
       const response = await fetch('/api/tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...toolData,
-          tags: toolData.tags.split(',').map(tag => tag.trim()),
-        }),
+        body: JSON.stringify(toolData),
       });
+
       if (response.ok) {
         router.push('/');
       } else {
-        throw new Error('Failed to submit tool');
+        const data = await response.json();
+        setError(data.message || '提交工具时出错');
       }
     } catch (error) {
-      console.error('Error submitting tool:', error);
-      // 这里可以添加错误处理逻辑，比如显示错误消息给用户
+      setError('提交工具时出错');
     }
   };
 
   return (
-    <Layout title="提交新工具 - AI工具导航" description="提交新的AI工具到我们的导航网站">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-blue-400">提交新工具</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <Layout title="提交新工具 - AI工具导航">
+      <div className="max-w-2xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
+        <h1 className="text-3xl font-bold mb-6 text-blue-400">提交新的 AI 工具</h1>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">工具名称</label>
             <input
@@ -65,7 +73,7 @@ export default function SubmitToolPage() {
               value={toolData.name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -76,28 +84,20 @@ export default function SubmitToolPage() {
               value={toolData.description}
               onChange={handleChange}
               required
-              rows={4}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">分类</label>
-            <select
+            <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">类别</label>
+            <input
+              type="text"
               id="category"
               name="category"
               value={toolData.category}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">选择分类</option>
-              <option value="文本生成">文本生成</option>
-              <option value="图像生成">图像生成</option>
-              <option value="音频处理">音频处理</option>
-              <option value="视频编辑">视频编辑</option>
-              <option value="数据分析">数据分析</option>
-              <option value="其他">其他</option>
-            </select>
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
             <label htmlFor="url" className="block text-sm font-medium text-gray-300 mb-1">网址</label>
@@ -108,39 +108,31 @@ export default function SubmitToolPage() {
               value={toolData.url}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-1">标签（用逗号分隔）</label>
+            <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-1">标签 (用逗号分隔)</label>
             <input
               type="text"
               id="tags"
               name="tags"
-              value={toolData.tags}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={toolData.tags.join(', ')}
+              onChange={handleTagChange}
+              className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">图标</label>
             <ImageUpload onUpload={handleIconUpload} />
-            {toolData.iconUrl && (
-              <img src={toolData.iconUrl} alt="Tool Icon" className="mt-2 h-16 w-16 object-cover rounded-full" />
-            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">截图</label>
             <ImageUpload onUpload={handleScreenshotUpload} />
-            {toolData.screenshotUrl && (
-              <img src={toolData.screenshotUrl} alt="Tool Screenshot" className="mt-2 w-full object-cover rounded" />
-            )}
           </div>
-          <div>
-            <button type="submit" className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-              提交工具
-            </button>
-          </div>
+          <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+            提交工具
+          </button>
         </form>
       </div>
     </Layout>

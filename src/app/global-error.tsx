@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 'use client';
 
 import React, { useEffect } from 'react';
+=======
+'use client'
+
+import { useEffect } from 'react'
+>>>>>>> 35606fa0e13de8545a3679d5a797af92108be371
 import * as Sentry from "@sentry/nextjs";
 
 export default function GlobalError({

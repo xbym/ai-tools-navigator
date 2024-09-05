@@ -1,4 +1,18 @@
+# *
 User-agent: *
 Allow: /
 
+# Host
+<<<<<<< HEAD
+Host: https://your-actual-domain.com
+
+# Sitemaps
+Sitemap: https://your-actual-domain.com/sitemap.xml
+Sitemap: https://your-actual-domain.com/api/sitemap.xml
+=======
+Host: https://your-domain.com
+
+# Sitemaps
 Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://your-domain.com/api/sitemap.xml
+>>>>>>> 8a16b222796b7fa8f136cf39ebe30fa7ca3392f5
