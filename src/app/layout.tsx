@@ -1,12 +1,6 @@
-import { Inter } from 'next/font/google'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata = {
-  title: 'AI工具导航',
-  description: '发现和探索最新最酷的AI工具',
-}
+import { AuthProvider } from '@/components/AuthProvider';
+import { ToastProvider } from '@/contexts/ToastContext';
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -14,8 +8,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh">
-      <body className={inter.className}>{children}</body>
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </AuthProvider>
+      </body>
     </html>
-  )
+  );
 }
