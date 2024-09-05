@@ -8,7 +8,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
-  isAdmin: () => boolean; // 添加这一行
+  isAdmin: () => boolean;
+  updateUser: (userData: Partial<User>) => Promise<void>; // 添加这一行
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -38,8 +39,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user?.role === 'admin';
   };
 
+  const updateUser = async (userData: Partial<User>) => {
+    // 实现更新用户信息的逻辑
+    try {
+      const response = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        throw new Error('Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isAdmin, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
