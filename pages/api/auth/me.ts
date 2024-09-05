@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { authMiddleware } from '../../../src/middleware/authMiddleware';
+import { withAuth } from '../../../src/middleware/authMiddleware';
 import User from '../../../src/models/User';
 import dbConnect from '../../../src/lib/dbConnect';
 
@@ -22,4 +22,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default authMiddleware(handler);
+export default withAuth(handler);

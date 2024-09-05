@@ -6,7 +6,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  lastPasswordReset: { type: Date, default: null }, // 新增字段
+  lastPasswordReset: { type: Date, default: null },
   resetToken: String,
   resetTokenExpiry: Date,
 }, { timestamps: true });

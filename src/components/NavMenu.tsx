@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 export function NavMenu() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, isAdmin } = useAuth();
 
   return (
     <nav className="flex justify-between items-center">
@@ -14,7 +14,7 @@ export function NavMenu() {
         <li><Link href="/submit-tool" className="text-white hover:text-gray-300">提交工具</Link></li>
         {isAuthenticated ? (
           <>
-            <li><Link href="/admin" className="text-white hover:text-gray-300">管理</Link></li>
+            {isAdmin() && <li><Link href="/admin" className="text-white hover:text-gray-300">管理</Link></li>}
             <li><button onClick={logout} className="text-white hover:text-gray-300">注销</button></li>
           </>
         ) : (
