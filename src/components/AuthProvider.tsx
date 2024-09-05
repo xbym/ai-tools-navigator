@@ -13,9 +13,10 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>; // 添加这一行
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  isAuthenticated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -62,8 +63,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('token');
   };
 
+  const contextValue: AuthContextType = {
+    user,
+    setUser,
+    isAuthenticated,
+    setIsAuthenticated, // 添加这一行
+    login,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

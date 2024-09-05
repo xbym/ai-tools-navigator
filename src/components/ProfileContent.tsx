@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSearchParams } from 'next/navigation';
 
 export default function ProfileContent() {
   const { user } = useAuth();
@@ -9,6 +10,7 @@ export default function ProfileContent() {
     username: '',
     email: '',
   });
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (user) {

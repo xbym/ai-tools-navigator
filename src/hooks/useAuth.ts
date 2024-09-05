@@ -1,55 +1,98 @@
 'use client';
 
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-
-interface User {
-  username: string;
-  email: string;
-  role: string;
-}
-=======
 import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/components/AuthProvider';
 import { fetchWithProgress } from '@/utils/fetchWithProgress';
->>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
+import { User } from '@/types/User';
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  const { user, setUser, isAuthenticated, setIsAuthenticated } = context;
 
-  // 实现登录、注销等功能...
   const login = async (email: string, password: string) => {
-    // 实现登录逻辑
-  };
-
-  const logout = () => {
-    // 实现注销逻辑
-  };
-
-<<<<<<< HEAD
-  const isAdmin = () => {
-    return user && user.role === 'admin';
-  };
-=======
-      const response = await fetchWithProgress('/api/user/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(userData),
+    try {
+      const response = await fetchWithProgress('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
->>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
 
-  const updateUser = async (userData: Partial<User>) => {
-    // 实现更新用户信息的逻辑
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      // 这里应该有一个 API 调用来更新后端的用户信息
+      if (response.ok) {
+        const { user, token } = await response.json();
+        setUser(user);
+        setIsAuthenticated(true);
+        localStorage.setItem('token', token);
+      } else {
+        throw new Error('Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
-  return { user, isAuthenticated, login, logout, isAdmin, updateUser };
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
+  };
+
+  const register = async (username: string, email: string, password: string) => {
+    try {
+      const response = await fetchWithProgress('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (response.ok) {
+        const { user, token } = await response.json();
+        setUser(user);
+        setIsAuthenticated(true);
+        localStorage.setItem('token', token);
+      } else {
+        throw new Error('Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
+
+  const updateUser = async (userData: Partial<User>) => {
+    if (user) {
+      try {
+        const token = localStorage.getItem('token'); // 从本地存储获取token
+        if (!token) {
+          throw new Error('No token found');
+        }
+
+        const response = await fetchWithProgress('/api/user/update', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(userData),
+        });
+
+        if (response.ok) {
+          const updatedUser = await response.json();
+          setUser(updatedUser);
+        } else {
+          throw new Error('Failed to update user');
+        }
+      } catch (error) {
+        console.error('Error updating user:', error);
+        // 可以在这里添加错误处理逻辑,比如显示错误消息
+      }
+    }
+  };
+
+  const isAdmin = user?.role === 'admin';
+
+  return { user, isAuthenticated, login, logout, register, isAdmin, updateUser };
 }

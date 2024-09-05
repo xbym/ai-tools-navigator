@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   }, [showToast]);
 
   useEffect(() => {
-    if (!isAdmin()) {
+    if (!isAdmin) {  // 修改这里，移除括号
       showToast('您没有权限访问此页面', 'error');
       router.push('/');
     } else {
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
     }
   }, [isAdmin, router, showToast, fetchUsers]);
 
-  if (!isAdmin()) {
+  if (!isAdmin) {  // 这里也要修改
     return null;
   }
 

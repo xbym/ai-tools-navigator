@@ -2,15 +2,13 @@
 
 import { Suspense } from 'react';
 import Layout from '@/components/Layout';
+import NotFoundContent from '@/components/NotFoundContent';
 
 export default function NotFound() {
   return (
-    <Layout title="404 - 页面未找到">
+    <Layout title="页面未找到 - AI工具导航">
       <Suspense fallback={<div>加载中...</div>}>
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">404 - 页面未找到</h1>
-          <p>抱歉,您请求的页面不存在。</p>
-        </div>
+        <NotFoundContent />
       </Suspense>
     </Layout>
   );

@@ -2,13 +2,13 @@
 
 import { Suspense } from 'react';
 import Layout from '@/components/Layout';
-import AdminDashboard from '@/components/AdminDashboard';
+import AdminContent from '@/components/AdminContent';
 
-export default function AdminPage() {
+export default function Admin() {
   return (
     <Layout title="管理面板 - AI工具导航">
       <Suspense fallback={<div>加载中...</div>}>
-        <AdminDashboard />
+        <AdminContent />
       </Suspense>
     </Layout>
   );

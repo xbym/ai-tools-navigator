@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME} next build",
+    "build": "cross-env CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME} next build",
     "start": "next start",
     "lint": "next lint",
     "import-data": "ts-node scripts/importData.ts",

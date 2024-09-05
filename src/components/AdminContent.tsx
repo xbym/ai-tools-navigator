@@ -1,15 +1,40 @@
 'use client';
 
-<<<<<<< HEAD
-import React from 'react'; // 添加这行
-=======
->>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import AdminDashboard from './AdminDashboard';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+
+function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState('addTool');
+  const { isAdmin, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!isAuthenticated || !isAdmin) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, isAdmin, router]);
+
+  if (!isAuthenticated || !isAdmin) {
+    return null;
+  }
+
+  // 管理员面板内容...
+
+  return (
+    <div>
+      {/* 管理员面板UI... */}
+    </div>
+  );
+}
 
 export default function AdminContent() {
-  const searchParams = useSearchParams();
-  // 使用 searchParams 的逻辑...
-
-  return <AdminDashboard />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminDashboard />
+    </Suspense>
+  );
 }
