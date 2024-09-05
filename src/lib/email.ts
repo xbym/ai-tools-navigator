@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { getPasswordResetEmailTemplate } from './emailTemplates';
 
 interface EmailOptions {
   to: string;
@@ -29,9 +30,18 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
       html,
     });
 
-    console.log('Email sent:', info.messageId);
+    console.log('Message sent: %s', info.messageId);
+    return info;
   } catch (error) {
     console.error('Error sending email:', error);
     throw error;
   }
+}
+
+export async function sendPasswordResetEmail(to: string, resetUrl: string, username: string) {
+  const subject = 'AI工具导航 - 密码重置';
+  const text = `请点击以下链接重置您的密码：${resetUrl}`;
+  const html = getPasswordResetEmailTemplate(resetUrl, username);
+
+  return sendEmail({ to, subject, text, html });
 }
