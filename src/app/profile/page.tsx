@@ -6,11 +6,16 @@ import Layout from '@/components/Layout';
 import { useRouter } from 'next/navigation';
 import EditProfileForm from '@/components/EditProfileForm';
 
+// 定义 User 接口
+interface User {
+  username: string;
+  email: string;
+}
+
 export default function ProfilePage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -20,40 +25,33 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, router]);
 
+  const handleProfileUpdate = () => {
+    // 处理个人资料更新成功的逻辑
+    console.log('个人资料更新成功');
+  };
+
+  const handleCancel = () => {
+    // 处理取消编辑的逻辑
+    console.log('取消编辑个人资料');
+  };
+
   if (isLoading) {
     return <div>加载中...</div>;
   }
 
   return (
     <Layout title="个人资料 - AI工具导航">
-      <div className="max-w-2xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
-        <h1 className="text-3xl font-bold mb-6 text-white">个人资料</h1>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">个人资料</h1>
         {user && (
-          <>
-            {isEditing ? (
-              <EditProfileForm
-                onCancel={() => setIsEditing(false)}
-                onSuccess={() => setIsEditing(false)}
-              />
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300">用户名</label>
-                  <p className="mt-1 text-lg text-white">{user.username}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300">电子邮件</label>
-                  <p className="mt-1 text-lg text-white">{user.email}</p>
-                </div>
-                <button
-                  className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
-                  onClick={() => setIsEditing(true)}
-                >
-                  编辑资料
-                </button>
-              </div>
-            )}
-          </>
+          <div>
+            <p>用户名: {(user as User).username}</p>
+            <p>邮箱: {(user as User).email}</p>
+            <EditProfileForm 
+              onCancel={handleCancel} 
+              onSuccess={handleProfileUpdate}
+            />
+          </div>
         )}
       </div>
     </Layout>
