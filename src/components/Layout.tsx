@@ -7,13 +7,15 @@ import { NavMenu } from './NavMenu';
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
+  description?: string; // 添加这一行
 }
 
-export default function Layout({ children, title = 'AI工具导航' }: LayoutProps) {
+export default function Layout({ children, title = 'AI工具导航', description }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
         <title>{title}</title>
+        {description && <meta name="description" content={description} />} {/* 添加这一行 */}
       </Head>
       <header className="bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-4">
