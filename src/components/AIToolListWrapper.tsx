@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import AIToolList from './AIToolList';
 import { AITool } from '@/types/AITool';
 
@@ -63,9 +62,6 @@ export default function AIToolListWrapper() {
 
   return (
     <div>
-      <Suspense fallback={<div>加载搜索参数中...</div>}>
-        <SearchParamsHandler />
-      </Suspense>
       <div className="mb-8 flex flex-col md:flex-row gap-4">
         <input
           type="text"
@@ -98,10 +94,4 @@ export default function AIToolListWrapper() {
       <AIToolList tools={filteredTools} />
     </div>
   );
-}
-
-function SearchParamsHandler() {
-  const searchParams = useSearchParams();
-  // 使用 searchParams 进行必要的操作
-  return null;
 }

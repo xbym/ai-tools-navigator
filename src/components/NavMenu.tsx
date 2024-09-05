@@ -15,7 +15,7 @@ export function NavMenu() {
         {isAuthenticated ? (
           <>
             <li><Link href="/profile" className="text-white hover:text-gray-300">个人资料</Link></li>
-            {isAdmin && <li><Link href="/admin" className="text-white hover:text-gray-300">管理</Link></li>}
+            {isAdmin() && <li><Link href="/admin" className="text-white hover:text-gray-300">管理</Link></li>}
             <li><button onClick={logout} className="text-white hover:text-gray-300">注销</button></li>
           </>
         ) : (
