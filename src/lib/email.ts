@@ -8,25 +8,28 @@ interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS,
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.GMAIL_USER,
-    to,
-    subject,
-    text,
-    html,
-  };
-
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: ' + info.response);
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+    });
+
+    console.log('Nodemailer transporter created');
+
+    const info = await transporter.sendMail({
+      from: `"AI工具导航" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    console.log('Email sent:', info.messageId);
   } catch (error) {
     console.error('Error sending email:', error);
     throw error;

@@ -7,13 +7,14 @@ export function NavMenu() {
   const { isAuthenticated, logout } = useAuth();
 
   return (
-    <nav>
+    <nav className="flex justify-between items-center">
+      <Link href="/" className="text-2xl font-bold text-white">AI工具导航</Link>
       <ul className="flex space-x-4">
-        <li><Link href="/">首页</Link></li>
-        <li><Link href="/submit-tool">提交工具</Link></li>
+        <li><Link href="/" className="text-white hover:text-gray-300">首页</Link></li>
+        <li><Link href="/submit-tool" className="text-white hover:text-gray-300">提交工具</Link></li>
         {isAuthenticated ? (
           <>
-            <li><Link href="/admin">管理</Link></li>
+            <li><Link href="/admin" className="text-white hover:text-gray-300">管理</Link></li>
             <li><button onClick={logout} className="text-white hover:text-gray-300">注销</button></li>
           </>
         ) : (

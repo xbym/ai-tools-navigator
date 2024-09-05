@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +24,7 @@ export default function ForgotPassword() {
 
       if (response.ok) {
         setMessage('如果该邮箱存在，我们已发送密码重置链接。请检查您的邮箱。');
+        setTimeout(() => router.push('/login'), 3000);
       } else {
         const data = await response.json();
         setError(data.message || '发送重置链接时出错');

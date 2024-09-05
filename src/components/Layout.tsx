@@ -7,19 +7,16 @@ import { NavMenu } from './NavMenu';
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
-  description?: string;
 }
 
-export default function Layout({ children, title = 'AI工具导航', description = '发现和探索最新最酷的AI工具' }: LayoutProps) {
+export default function Layout({ children, title = 'AI工具导航' }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
         <title>{title}</title>
-        <meta name="description" content={description} />
       </Head>
       <header className="bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">AI工具导航</h1>
+        <div className="container mx-auto px-4 py-4">
           <NavMenu />
         </div>
       </header>

@@ -3,6 +3,7 @@ import { Metadata, ResolvingMetadata } from 'next'
 import AITool from '@/models/AITool'
 import dbConnect from '@/lib/dbConnect'
 import { notFound } from 'next/navigation'
+import Layout from '@/components/Layout'
 
 type Props = {
   params: { id: string }
@@ -41,8 +42,10 @@ export default async function ToolDetail({ params }: Props) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <ToolDetailContent id={id} />
-    </div>
+    <Layout title={`${tool.name} - AI Tool Details`}>
+      <div className="container mx-auto px-4 py-8">
+        <ToolDetailContent id={id} />
+      </div>
+    </Layout>
   );
 }
