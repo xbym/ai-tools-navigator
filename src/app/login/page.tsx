@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +23,9 @@ export default function Login() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        // 在这里处理登录成功的逻辑，例如保存 token 到 localStorage
-        localStorage.setItem('token', data.token);
-        router.push('/'); // 登录成功后重定向到首页
+        const { accessToken, refreshToken } = await res.json();
+        login(accessToken, refreshToken);
+        router.push('/');
       } else {
         const data = await res.json();
         setError(data.message || 'Login failed');
