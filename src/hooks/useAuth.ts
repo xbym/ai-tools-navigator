@@ -2,6 +2,7 @@
 
 import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/components/AuthProvider';
+import { fetchWithProgress } from '@/utils/fetchWithProgress';
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -23,7 +24,7 @@ export function useAuth() {
         throw new Error('No token found');
       }
 
-      const response = await fetch('/api/user/update', {
+      const response = await fetchWithProgress('/api/user/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
