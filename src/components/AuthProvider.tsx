@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: () => boolean; // 添加这一行
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -33,8 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 实现登出逻辑
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

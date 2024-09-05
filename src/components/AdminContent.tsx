@@ -12,13 +12,9 @@ function AdminDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (!isAuthenticated || !isAdmin) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, isAdmin, router]);
-
-  if (!isAuthenticated || !isAdmin) {
+  // 使用 isAdmin 作为函数
+  if (!isAuthenticated || !isAdmin()) {
+    // 重定向逻辑
     return null;
   }
 
