@@ -1,7 +1,8 @@
 export interface User {
-  id: string;
+  _id?: string;
+  id?: string;
   username: string;
   email: string;
   role: 'user' | 'admin';
-  // 添加其他你需要的用户属性
+  // 其他用户属性
 }
