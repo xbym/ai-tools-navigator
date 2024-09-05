@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
+import PasswordStrengthIndicator from '@/components/PasswordStrengthIndicator';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -71,6 +72,7 @@ export default function Register() {
               required
               className="w-full px-3 py-2 bg-gray-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <PasswordStrengthIndicator password={password} />
           </div>
           <button
             type="submit"
