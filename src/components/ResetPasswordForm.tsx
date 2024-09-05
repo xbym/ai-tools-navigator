@@ -42,6 +42,9 @@ export default function ResetPasswordForm() {
       } else {
         const data = await response.json();
         setError(data.message || '重置密码时出错');
+        if (data.message === '密码重置过于频繁,请稍后再试') {
+          // 可以在这里添加一些额外的UI反馈,比如显示剩余等待时间
+        }
       }
     } catch (error) {
       setError('重置密码时出错');
