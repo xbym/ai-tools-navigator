@@ -1,26 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function AdminDashboard() {
-  const [users, setUsers] = useState([]);
-  const { isAdmin, user } = useAuth();
+  const [users, setUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAdmin } = useAuth();
   const router = useRouter();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    if (!isAdmin()) {
-      showToast('您没有权限访问此页面', 'error');
-      router.push('/');
-    } else {
-      fetchUsers();
-    }
-  }, [isAdmin, router, showToast]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users', {
         headers: {
@@ -35,8 +27,19 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       showToast('获取用户列表时发生错误', 'error');
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (!isAdmin()) {
+      showToast('您没有权限访问此页面', 'error');
+      router.push('/');
+    } else {
+      fetchUsers();
+    }
+  }, [isAdmin, router, showToast, fetchUsers]);
 
   if (!isAdmin()) {
     return null;
@@ -46,11 +49,15 @@ export default function AdminDashboard() {
     <div>
       <h1>管理员仪表板</h1>
       <h2>用户列表</h2>
-      <ul>
-        {users.map((user: any) => (
-          <li key={user._id}>{user.username} - {user.email}</li>
-        ))}
-      </ul>
+      {isLoading ? (
+        <p>加载中...</p>
+      ) : (
+        <ul>
+          {users.map((user: any) => (
+            <li key={user._id}>{user.username} - {user.email}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

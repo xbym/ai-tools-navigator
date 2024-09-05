@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import ImageUpload from '@/components/ImageUpload';
+import Image from 'next/image';
 
 export default function SubmitToolPage() {
   const router = useRouter();
@@ -126,14 +127,26 @@ export default function SubmitToolPage() {
             <label className="block text-sm font-medium text-gray-300 mb-1">图标</label>
             <ImageUpload onUpload={handleIconUpload} />
             {toolData.iconUrl && (
-              <img src={toolData.iconUrl} alt="Tool Icon" className="mt-2 h-16 w-16 object-cover rounded-full" />
+              <Image
+                src={toolData.iconUrl}
+                alt="Tool Icon"
+                width={64}
+                height={64}
+                className="mt-2 h-16 w-16 object-cover rounded-full"
+              />
             )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">截图</label>
             <ImageUpload onUpload={handleScreenshotUpload} />
             {toolData.screenshotUrl && (
-              <img src={toolData.screenshotUrl} alt="Tool Screenshot" className="mt-2 w-full object-cover rounded" />
+              <Image
+                src={toolData.screenshotUrl}
+                alt="Tool Screenshot"
+                width={800}
+                height={450}
+                className="mt-2 w-full object-cover rounded"
+              />
             )}
           </div>
           <div>

@@ -1,4 +1,10 @@
+# *
 User-agent: *
 Allow: /
 
-Sitemap: https://your-domain.com/sitemap.xml
+# Host
+Host: https://your-actual-domain.com
+
+# Sitemaps
+Sitemap: https://your-actual-domain.com/sitemap.xml
+Sitemap: https://your-actual-domain.com/api/sitemap.xml
