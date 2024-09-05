@@ -1,13 +1,16 @@
+import { Suspense } from 'react';
 import Layout from '@/components/Layout';
-import ResetPasswordForm from '@/components/ResetPasswordForm';
+import ClientComponent from '@/components/ClientComponent';
+import ResetPasswordForm from '@/components/ResetPasswordForm'; // 假设你有这个组件
 
 export default function ResetPassword() {
   return (
     <Layout title="重置密码 - AI工具导航">
-      <div className="max-w-md mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
-        <h1 className="text-2xl font-bold mb-6 text-white">重置密码</h1>
-        <ResetPasswordForm />
-      </div>
+      <Suspense fallback={<div>加载中...</div>}>
+        <ClientComponent>
+          <ResetPasswordForm />
+        </ClientComponent>
+      </Suspense>
     </Layout>
   );
 }
