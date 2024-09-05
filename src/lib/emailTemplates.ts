@@ -1,4 +1,6 @@
 export function getPasswordResetEmailTemplate(resetUrl: string, username: string): string {
+  const logoUrl = 'https://your-logo-url.com/logo.png'; // 替换为你的实际 logo URL
+
   return `
     <!DOCTYPE html>
     <html lang="zh-CN">
@@ -12,11 +14,13 @@ export function getPasswordResetEmailTemplate(resetUrl: string, username: string
         .header { background-color: #3490dc; color: white; padding: 20px; text-align: center; }
         .content { background-color: #f8fafc; padding: 20px; }
         .button { display: inline-block; background-color: #3490dc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        .logo { max-width: 150px; height: auto; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
+          <img src="${logoUrl}" alt="AI工具导航" class="logo">
           <h1>AI工具导航</h1>
         </div>
         <div class="content">
