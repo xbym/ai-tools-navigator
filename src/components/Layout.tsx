@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Head from 'next/head';
 import { NavMenu } from './NavMenu';
 
@@ -23,7 +23,9 @@ export default function Layout({ children, title = 'AI工具导航', description
         </div>
       </header>
       <main className="flex-grow container mx-auto px-4 py-8">
-        {children}
+        <Suspense fallback={<div>加载中...</div>}>
+          {children}
+        </Suspense>
       </main>
       <footer className="bg-gray-800 text-white text-center py-4">
         <p>&copy; 2024 AI工具导航. All rights reserved.</p>
