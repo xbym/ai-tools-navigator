@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
+import { fetchWithProgress } from '@/utils/fetchWithProgress';
 
 export interface User {
   id: string;
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetchWithProgress('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

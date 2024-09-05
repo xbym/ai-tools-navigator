@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { Suspense } from 'react';
 import Layout from '@/components/Layout';
+<<<<<<< HEAD
 import { useRouter } from 'next/navigation';
 import EditProfileForm from '@/components/EditProfileForm';
 
@@ -38,9 +38,14 @@ export default function ProfilePage() {
   if (isLoading) {
     return <div>加载中...</div>;
   }
+=======
+import ProfileContent from '@/components/ProfileContent';
+>>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
 
+export default function Profile() {
   return (
     <Layout title="个人资料 - AI工具导航">
+<<<<<<< HEAD
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-4">个人资料</h1>
         {user && (
@@ -54,6 +59,11 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+=======
+      <Suspense fallback={<div>加载中...</div>}>
+        <ProfileContent />
+      </Suspense>
+>>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
     </Layout>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 
 interface User {
@@ -7,6 +8,11 @@ interface User {
   email: string;
   role: string;
 }
+=======
+import { useContext } from 'react';
+import { AuthContext, AuthContextType } from '@/components/AuthProvider';
+import { fetchWithProgress } from '@/utils/fetchWithProgress';
+>>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,9 +27,20 @@ export function useAuth() {
     // 实现注销逻辑
   };
 
+<<<<<<< HEAD
   const isAdmin = () => {
     return user && user.role === 'admin';
   };
+=======
+      const response = await fetchWithProgress('/api/user/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+      });
+>>>>>>> 8deb8ac4eedb68b765c04c7773d30ee72ae62ee4
 
   const updateUser = async (userData: Partial<User>) => {
     // 实现更新用户信息的逻辑
