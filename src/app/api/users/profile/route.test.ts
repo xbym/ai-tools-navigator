@@ -8,6 +8,7 @@ jest.mock('@/middleware/authMiddleware');
 jest.mock('@/models/User', () => ({
   findById: jest.fn().mockReturnThis(),
   select: jest.fn(),
+  findByIdAndUpdate: jest.fn(),
 }));
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -16,10 +17,10 @@ jest.mock('next/server', () => ({
       json: async () => body,
     })),
   },
-  NextRequest: jest.fn().mockImplementation((url) => ({
+  NextRequest: jest.fn().mockImplementation((url, options) => ({
     url,
     headers: new Map(),
-    // 添加其他你可能需要的 NextRequest 属性
+    json: jest.fn().mockResolvedValue(options?.body || {}),
   })),
 }));
 
@@ -39,17 +40,56 @@ describe('User Profile API', () => {
       const req = new NextRequest('http://localhost/api/users/profile') as unknown as NextRequest;
       const res = await GET(req);
 
-      if (res.status !== 200) {
-        console.error('Unexpected response:', res);
-      }
-
       expect(res.status).toBe(200);
       const jsonResponse = await res.json();
       expect(jsonResponse).toEqual(mockUser);
     });
 
-    // ... 其他测试
+    it('should return 404 if user not found', async () => {
+      (User.findById as jest.Mock).mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null)
+      }));
+      (authMiddleware as jest.Mock).mockImplementation((req, handler) => handler(req, '123'));
+
+      const req = new NextRequest('http://localhost/api/users/profile') as unknown as NextRequest;
+      const res = await GET(req);
+
+      expect(res.status).toBe(404);
+      const jsonResponse = await res.json();
+      expect(jsonResponse).toEqual({ message: '用户不存在' });
+    });
   });
 
-  // ... PUT 测试
+  describe('PUT', () => {
+    it('should update user profile', async () => {
+      const updatedUser = { _id: '123', username: 'updateduser', email: 'updated@example.com' };
+      (User.findByIdAndUpdate as jest.Mock).mockResolvedValue(updatedUser);
+      (authMiddleware as jest.Mock).mockImplementation((req, handler) => handler(req, '123'));
+
+      const req = new NextRequest('http://localhost/api/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ username: 'updateduser', email: 'updated@example.com' }),
+      }) as unknown as NextRequest;
+      const res = await PUT(req);
+
+      expect(res.status).toBe(200);
+      const jsonResponse = await res.json();
+      expect(jsonResponse).toEqual(updatedUser);
+    });
+
+    it('should return 404 if user not found during update', async () => {
+      (User.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+      (authMiddleware as jest.Mock).mockImplementation((req, handler) => handler(req, '123'));
+
+      const req = new NextRequest('http://localhost/api/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ username: 'updateduser', email: 'updated@example.com' }),
+      }) as unknown as NextRequest;
+      const res = await PUT(req);
+
+      expect(res.status).toBe(404);
+      const jsonResponse = await res.json();
+      expect(jsonResponse).toEqual({ message: '用户不存在' });
+    });
+  });
 });

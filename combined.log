@@ -41,3 +41,5 @@
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T08:39:37.824Z"}
 {"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T08:39:37.844Z"}
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T08:39:37.855Z"}
+{"level":"error","message":"API Error User_1.default.findByIdAndUpdate(...).select is not a function","service":"ai-tools-navigator","timestamp":"2024-09-06T08:42:59.410Z","url":"http://localhost/api/users/profile"}
+{"level":"error","message":"API Error User_1.default.findByIdAndUpdate(...).select is not a function","service":"ai-tools-navigator","timestamp":"2024-09-06T08:42:59.418Z","url":"http://localhost/api/users/profile"}

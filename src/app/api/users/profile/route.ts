@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
       const data = await req.json();
-      const user = await User.findByIdAndUpdate(userId, data, { new: true }).select('-password');
+      const user = await User.findByIdAndUpdate(userId, data, { new: true, select: '-password' });
       if (!user) {
         return NextResponse.json({ message: '用户不存在' }, { status: 404 });
       }
