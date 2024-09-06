@@ -1,56 +1,35 @@
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { AuthContext, AuthContextType } from '@/components/AuthProvider';
+import { isTokenExpired, refreshToken } from '@/lib/auth';
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
-  const { user, login, logout, isAuthenticated, setUser } = context;
-
-  const isAdmin = () => {
-    return user?.role === 'admin';
-  };
-
-  const updateUser = async (userData: { username: string; email: string }) => {
-    try {
+  useEffect(() => {
+    const checkTokenExpiration = async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found');
+      if (token && isTokenExpired(token)) {
+        try {
+          const newToken = await refreshToken(token);
+          localStorage.setItem('token', newToken);
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          context.logout();
+        }
       }
+    };
 
-      const response = await fetch('/api/user/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(userData),
-      });
+    checkTokenExpiration();
+    const intervalId = setInterval(checkTokenExpiration, 5 * 60 * 1000); // 每5分钟检查一次
 
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update user profile');
-      }
-    } catch (error) {
-      console.error('Error updating user profile:', error);
-      throw error;
-    }
-  };
+    return () => clearInterval(intervalId);
+  }, [context]);
 
-  return {
-    user,
-    login,
-    logout,
-    isAuthenticated,
-    isAdmin,
-    updateUser,
-  };
+  return context as AuthContextType;
 }

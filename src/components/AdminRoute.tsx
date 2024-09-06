@@ -9,9 +9,7 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated && !isAdmin()) {
-      router.push('/');
-    } else if (!isAuthenticated) {
+    if (!isAuthenticated || !isAdmin()) {
       router.push('/login');
     }
   }, [isAuthenticated, isAdmin, router]);

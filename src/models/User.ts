@@ -1,16 +1,32 @@
-import mongoose from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const UserSchema = new mongoose.Schema({
+interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  role: 'user' | 'admin';
+  comparePassword(candidatePassword: string): Promise<boolean>;
+  resetToken?: string;
+  resetTokenExpiry?: Date;
+  lastPasswordReset?: Date; // 添加这个字段
+}
+
+interface IUserModel extends Model<IUser> {
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+const UserSchema = new mongoose.Schema<IUser>({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  // 其他字段...
+  resetToken: String,
+  resetTokenExpiry: Date,
+  lastPasswordReset: Date, // 添加这个字段
 });
 
-// 在保存之前加密密码
-UserSchema.pre('save', async function(next) {
+UserSchema.pre<IUser>('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   const salt = await bcrypt.genSalt(10);
@@ -18,11 +34,10 @@ UserSchema.pre('save', async function(next) {
   next();
 });
 
-// 验证密码的方法
-UserSchema.methods.comparePassword = async function(candidatePassword: string) {
+UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+const User = mongoose.models.User as IUserModel || mongoose.model<IUser, IUserModel>('User', UserSchema);
 
 export default User;

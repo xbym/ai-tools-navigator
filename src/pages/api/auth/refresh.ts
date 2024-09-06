@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import jwt from 'jsonwebtoken';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/models/User';
-import jwt from 'jsonwebtoken';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'PUT') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
@@ -23,16 +23,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const { username, email } = req.body;
+    const newToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
 
-    if (username) user.username = username;
-    if (email) user.email = email;
-
-    await user.save();
-
-    res.status(200).json({ user: { id: user._id, username: user.username, email: user.email, role: user.role } });
+    res.status(200).json({ token: newToken });
   } catch (error) {
-    console.error('Update user error:', error);
-    res.status(500).json({ message: 'Error updating user' });
+    console.error('Token refresh error:', error);
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
 }
