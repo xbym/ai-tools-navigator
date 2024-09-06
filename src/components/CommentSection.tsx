@@ -23,17 +23,24 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(5);
   const { user, isAuthenticated } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchComments();
+    fetchComments(1);
   }, [toolId]);
 
-  const fetchComments = async () => {
-    const response = await fetch(`/api/tools/${toolId}/comments`);
+  const fetchComments = async (page: number) => {
+    setIsLoading(true);
+    const response = await fetch(`/api/tools/${toolId}/comments?page=${page}&limit=10`);
     if (response.ok) {
       const data = await response.json();
-      setComments(data);
+      setComments(data.comments);
+      setCurrentPage(data.currentPage);
+      setTotalPages(data.totalPages);
     }
+    setIsLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,29 +57,60 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     if (response.ok) {
       setNewComment('');
       setNewRating(5);
-      fetchComments();
+      fetchComments(1); // 重新加载第一页评论
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchComments(newPage);
     }
   };
 
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
-      {comments.map((comment) => (
-        <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-bold text-blue-300">
-              {typeof comment.userId === 'object' && comment.userId.username
-                ? comment.userId.username
-                : '匿名用户'}
+      {isLoading ? (
+        <p className="text-white">加载中...</p>
+      ) : (
+        <>
+          {comments.map((comment) => (
+            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg shadow">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-blue-300">
+                  {typeof comment.userId === 'object' && comment.userId.username
+                    ? comment.userId.username
+                    : '匿名用户'}
+                </span>
+                <span className="text-yellow-400">评分: {comment.rating}/5</span>
+              </div>
+              <p className="text-gray-200">{comment.content}</p>
+              <span className="text-sm text-gray-400">
+                {new Date(comment.createdAt).toLocaleString()}
+              </span>
+            </div>
+          ))}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="mx-1 px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-400"
+            >
+              上一页
+            </button>
+            <span className="mx-2 text-white">
+              第 {currentPage} 页，共 {totalPages} 页
             </span>
-            <span className="text-yellow-400">评分: {comment.rating}/5</span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="mx-1 px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-400"
+            >
+              下一页
+            </button>
           </div>
-          <p className="text-gray-200">{comment.content}</p>
-          <span className="text-sm text-gray-400">
-            {new Date(comment.createdAt).toLocaleString()}
-          </span>
-        </div>
-      ))}
+        </>
+      )}
       {isAuthenticated && (
         <form onSubmit={handleSubmit} className="mt-6">
           <textarea

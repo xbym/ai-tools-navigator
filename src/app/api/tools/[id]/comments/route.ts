@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/middleware/authMiddleware';
 import { errorHandler } from '@/middleware/errorHandler';
 import AITool from '@/models/AITool';
+import User from '@/models/User';
+import { Types } from 'mongoose';
 
 // 定义评论的接口
 interface IComment {
@@ -10,6 +12,12 @@ interface IComment {
   content: string;
   rating: number;
   createdAt: Date;
+}
+
+// 定义用户文档的接口
+interface IUser {
+  _id: Types.ObjectId;
+  username: string;
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -35,22 +43,44 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const tool = await AITool.findById(params.id).populate('comments.userId', 'username');
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const skip = (page - 1) * limit;
+
+    const tool = await AITool.findById(params.id);
 
     if (!tool) {
       return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
     }
 
+    const totalComments = tool.comments.length;
+    const paginatedComments = tool.comments.slice(skip, skip + limit);
+
     // 确保返回的评论数据结构正确
-    const formattedComments = tool.comments.map((comment: IComment) => ({
-      _id: comment._id,
-      userId: typeof comment.userId === 'object' ? comment.userId : { _id: comment.userId, username: '匿名用户' },
-      content: comment.content,
-      rating: comment.rating,
-      createdAt: comment.createdAt
+    const formattedComments = await Promise.all(paginatedComments.map(async (comment: IComment) => {
+      let userId = comment.userId;
+      if (typeof userId === 'string') {
+        const user = await User.findById(userId).select('username') as IUser | null;
+        userId = user 
+          ? { _id: user._id.toString(), username: user.username } 
+          : { _id: userId, username: '匿名用户' };
+      }
+      return {
+        _id: comment._id,
+        userId,
+        content: comment.content,
+        rating: comment.rating,
+        createdAt: comment.createdAt
+      };
     }));
 
-    return NextResponse.json(formattedComments);
+    return NextResponse.json({
+      comments: formattedComments,
+      currentPage: page,
+      totalPages: Math.ceil(totalComments / limit),
+      totalComments
+    });
   } catch (error) {
     return errorHandler(error, request);
   }
