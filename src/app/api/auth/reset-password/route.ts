@@ -1,35 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { errorHandler } from '@/middleware/errorHandler';
-import { logger } from '@/utils/logger';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
-    logger.info('Password reset attempt');
     await dbConnect();
-    const { token, password } = await request.json();
+    const { email, newPassword } = await request.json();
 
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() }
-    });
-
+    const user = await User.findOne({ email });
     if (!user) {
-      logger.warn('Password reset failed: Invalid or expired token');
-      return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
+      return NextResponse.json({ message: '用户不存在' }, { status: 404 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
     user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
     await user.save();
 
-    logger.info('Password reset successful', { userId: user._id });
-    return NextResponse.json({ message: 'Password has been reset successfully' });
+    console.log('Password reset successful');
+    console.log('New hashed password:', hashedPassword);
+
+    return NextResponse.json({ message: '密码已重置' }, { status: 200 });
   } catch (error) {
-    return errorHandler(error, request);
+    console.error('Password reset error:', error);
+    return NextResponse.json({ message: '密码重置失败' }, { status: 500 });
   }
 }

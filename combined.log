@@ -81,3 +81,40 @@
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.226Z"}
 {"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.249Z"}
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.260Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:24:55.365Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:24:55.651Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:24:55.676Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:24:55.687Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:25:39.252Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:25:39.266Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:25:39.280Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:25:39.292Z"}
+{"level":"error","message":"API Error user.comparePassword is not a function","method":"POST","service":"ai-tools-navigator","timestamp":"2024-09-06T11:27:20.327Z","url":"http://localhost:3000/api/auth/login"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:28:05.375Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:28:05.698Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:28:05.717Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:28:05.728Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:30:00.034Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:30:00.058Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:30:00.091Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:30:00.101Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.002Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.288Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.307Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.317Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.330Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.340Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.356Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:33:21.367Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:40:16.370Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:40:16.394Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:40:16.430Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:40:16.440Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:43:40.814Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:43:40.854Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:43:40.872Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:43:40.919Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:47:10.634Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:47:10.657Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T11:47:10.691Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T11:47:10.701Z"}
