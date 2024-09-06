@@ -140,6 +140,32 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     setCurrentPage(1);
   };
 
+  const handleReport = async (commentId: string) => {
+    if (!user || !token) {
+      alert('请先登录后再举报评论');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/report`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        alert('评论已被举报,管理员会尽快处理');
+      } else {
+        alert('举报失败,请稍后再试');
+      }
+    } catch (error) {
+      console.error('Error reporting comment:', error);
+      alert('举报时发生错误,请稍后再试');
+    }
+  };
+
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
@@ -217,6 +243,19 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                       </button>
                     </div>
                   )}
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      {/* ... 点赞/踩按钮保持不变 */}
+                    </div>
+                    {user && user.id !== comment.user.id && (
+                      <button 
+                        onClick={() => handleReport(comment._id)}
+                        className="text-yellow-500 hover:text-yellow-600"
+                      >
+                        举报
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
             </div>

@@ -5,7 +5,7 @@ interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin';  // 确保这个字段存在
   avatarUrl: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },  // 确保这个字段存在
   avatarUrl: { type: String, default: '/default-avatar.png' },
   resetToken: String,
   resetTokenExpiry: Date,

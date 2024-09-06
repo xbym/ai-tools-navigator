@@ -34,7 +34,8 @@ const CommentSchema = new mongoose.Schema({
   userReactions: [{ 
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reaction: { type: String, enum: ['like', 'dislike'] }
-  }]
+  }],
+  reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 interface IComment {
