@@ -4,6 +4,7 @@ import AITool from '@/models/AITool';
 import { authMiddleware } from '@/middleware/authMiddleware';
 import { errorHandler } from '@/middleware/errorHandler';
 import mongoose from 'mongoose';  // 添加这行
+import { logger } from '@/utils/logger';  // 添加这行
 
 // 定义评论的接口
 interface IComment {
@@ -25,21 +26,30 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     try {
       await dbConnect();
       const { content, rating } = await req.json();
-      const tool = await AITool.findById(params.id);
+      
+      // 验证 content 和 rating
+      if (!content || typeof content !== 'string' || content.trim() === '') {
+        return NextResponse.json({ message: '评论内容不能为空' }, { status: 400 });
+      }
+      if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+        return NextResponse.json({ message: '评分必须是1到5之间的数字' }, { status: 400 });
+      }
 
+      // 使用从 authMiddleware 传递的 userId
+      const userObjectId = new mongoose.Types.ObjectId(userId);
+      
+      const tool = await AITool.findById(params.id);
       if (!tool) {
         return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
       }
 
-      // 添加一个小延迟,模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      tool.comments.push({ userId, content, rating });
+      tool.comments.push({ userId: userObjectId, content, rating });
       tool.updateAverageRating();
       await tool.save();
 
       return NextResponse.json({ message: '评论已添加' }, { status: 201 });
     } catch (error) {
+      logger.error('Error in POST /api/tools/[id]/comments:', error);
       return errorHandler(error, request);
     }
   });
@@ -116,4 +126,66 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   } catch (error) {
     return errorHandler(error, request);
   }
+}
+
+// 添加新的路由处理函数
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+    try {
+      await dbConnect();
+      const { commentId, content, rating } = await req.json();
+      const tool = await AITool.findById(params.id);
+
+      if (!tool) {
+        return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
+      }
+
+      const comment = tool.comments.id(commentId);
+      if (!comment) {
+        return NextResponse.json({ message: '评论不存在' }, { status: 404 });
+      }
+
+      if (comment.userId.toString() !== userId) {
+        return NextResponse.json({ message: '无权编辑此评论' }, { status: 403 });
+      }
+
+      comment.content = content;
+      comment.rating = rating;
+      await tool.save();
+
+      return NextResponse.json({ message: '评论已更新' });
+    } catch (error) {
+      return errorHandler(error, request);
+    }
+  });
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+    try {
+      await dbConnect();
+      const { commentId } = await req.json();
+      const tool = await AITool.findById(params.id);
+
+      if (!tool) {
+        return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
+      }
+
+      const comment = tool.comments.id(commentId);
+      if (!comment) {
+        return NextResponse.json({ message: '评论不存在' }, { status: 404 });
+      }
+
+      if (comment.userId.toString() !== userId) {
+        return NextResponse.json({ message: '无权删除此评论' }, { status: 403 });
+      }
+
+      tool.comments.pull(commentId);
+      await tool.save();
+
+      return NextResponse.json({ message: '评论已删除' });
+    } catch (error) {
+      return errorHandler(error, request);
+    }
+  });
 }

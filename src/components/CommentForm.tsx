@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/contexts/ToastContext';
-import LoadingSpinner from './LoadingSpinner';
 
 interface CommentFormProps {
   toolId: string;
@@ -12,43 +10,45 @@ export default function CommentForm({ toolId, onCommentAdded }: CommentFormProps
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, token } = useAuth();
-  const { showToast } = useToast();
+  const { user, token } = useAuth();  // 获取token
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !token) {
-      showToast('请先登录后再评论', 'error');
+      alert('请先登录后再评论');
       return;
     }
-    if (content.trim() === '' || rating === 0) {
-      showToast('请填写评论内容并选择评分', 'error');
+    if (rating === 0) {
+      alert('请选择评分');
       return;
     }
-
+    if (!content.trim()) {
+      alert('评论内容不能为空');
+      return;
+    }
     setIsSubmitting(true);
     try {
+      console.log('Submitting comment:', { content, rating, userId: user.id });
       const response = await fetch(`/api/tools/${toolId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ content, rating })
+        body: JSON.stringify({ content, rating }),
       });
-
       if (response.ok) {
-        showToast('评论提交成功', 'success');
         setContent('');
         setRating(0);
         onCommentAdded();
       } else {
-        const data = await response.json();
-        showToast(data.message || '评论提交失败', 'error');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.message || 'Failed to submit comment');
       }
     } catch (error) {
       console.error('Error submitting comment:', error);
-      showToast('评论提交失败,请稍后重试', 'error');
+      alert(error instanceof Error ? error.message : '提交评论失败,请稍后再试');
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +85,7 @@ export default function CommentForm({ toolId, onCommentAdded }: CommentFormProps
         disabled={isSubmitting}
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-blue-400"
       >
-        {isSubmitting ? <LoadingSpinner /> : '提交评论'}
+        {isSubmitting ? '提交中...' : '提交评论'}
       </button>
     </form>
   );

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Comment } from '@/types/AITool';
 import Image from 'next/image';
+import EditCommentForm from './EditCommentForm';
+import CommentForm from './CommentForm';
 
 interface CommentSectionProps {
   toolId: string;
@@ -17,6 +19,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const { user } = useAuth();
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   const fetchComments = async (page: number) => {
     setIsLoading(true);
@@ -54,10 +57,58 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     setCurrentPage(1);
   };
 
+  const handleEditComment = async (commentId: string, newContent: string, newRating: number) => {
+    try {
+      const response = await fetch(`/api/tools/${toolId}/comments`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId, content: newContent, rating: newRating }),
+      });
+
+      if (response.ok) {
+        // 更新本地评论状态
+        setComments(comments.map(comment => 
+          comment._id === commentId ? { ...comment, content: newContent, rating: newRating } : comment
+        ));
+        setEditingCommentId(null);
+      } else {
+        // 处理错误
+      }
+    } catch (error) {
+      // 处理错误
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (window.confirm('确定要删除这条评论吗?')) {
+      try {
+        const response = await fetch(`/api/tools/${toolId}/comments`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ commentId }),
+        });
+
+        if (response.ok) {
+          // 从本地状态中移除评论
+          setComments(comments.filter(comment => comment._id !== commentId));
+        } else {
+          // 处理错误
+        }
+      } catch (error) {
+        // 处理错误
+      }
+    }
+  };
+
+  const handleCommentAdded = () => {
+    fetchComments(1); // 重新加载第一页评论
+  };
+
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
-      <div className="mb-4">
+      <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
+      <div className="mb-4 mt-6">
         <select
           onChange={handleSortChange}
           className="bg-gray-700 text-white p-2 rounded"
@@ -88,17 +139,38 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                 }}
               />
               <div className="flex-grow">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-blue-300">
-                    {comment.user?.username || '匿名用户'}
-                  </span>
-                  <span className="text-yellow-400">评分: {comment.rating}/5</span>
-                </div>
-                <p className="text-gray-200">{comment.content}</p>
-                <span className="text-sm text-gray-400">
-                  {new Date(comment.createdAt).toLocaleString()}
-                </span>
+                {editingCommentId === comment._id ? (
+                  <EditCommentForm
+                    initialContent={comment.content}
+                    initialRating={comment.rating}
+                    onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
+                    onCancel={() => setEditingCommentId(null)}
+                  />
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-blue-300">
+                        {comment.user?.username || '匿名用户'}
+                      </span>
+                      <span className="text-yellow-400">评分: {comment.rating}/5</span>
+                    </div>
+                    <p className="text-gray-200">{comment.content}</p>
+                    <span className="text-sm text-gray-400">
+                      {new Date(comment.createdAt).toLocaleString()}
+                    </span>
+                  </>
+                )}
               </div>
+              {user && user.id === comment.userId && (
+                <div className="ml-auto">
+                  {editingCommentId === comment._id ? null : (
+                    <>
+                      <button onClick={() => setEditingCommentId(comment._id)}>编辑</button>
+                      <button onClick={() => handleDeleteComment(comment._id)}>删除</button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))}
           <div className="flex justify-center mt-4">

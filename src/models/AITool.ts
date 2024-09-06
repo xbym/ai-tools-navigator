@@ -1,9 +1,33 @@
 import mongoose from 'mongoose';
 
+interface ValidatorProps {
+  value: any;
+}
+
 const CommentSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String, required: true },
-  rating: { type: Number, min: 1, max: 5, required: true },
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true,
+    validate: {
+      validator: function(v: any) {
+        return mongoose.Types.ObjectId.isValid(v);
+      },
+      message: (props: ValidatorProps) => `${props.value} is not a valid ObjectId!`
+    }
+  },
+  content: { 
+    type: String, 
+    required: true,
+    trim: true,
+    minlength: [1, 'Comment content cannot be empty']
+  },
+  rating: { 
+    type: Number, 
+    required: true, 
+    min: [1, 'Rating must be at least 1'], 
+    max: [5, 'Rating cannot be more than 5']
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

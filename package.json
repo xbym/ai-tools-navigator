@@ -11,7 +11,8 @@
     "migrate": "cross-env NODE_ENV=development ts-node --project tsconfig.server.json scripts/migrateToMongoDB.ts",
     "postbuild": "next-sitemap",
     "generate-sitemap": "next-sitemap",
-    "test": "jest --config jest.config.js"
+    "test": "jest --config jest.config.js",
+    "check-comments": "ts-node scripts/checkComments.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^8.28.0",

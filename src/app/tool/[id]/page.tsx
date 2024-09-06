@@ -50,7 +50,7 @@ export default async function ToolDetail({ params }: Props) {
     <Layout title={`${tool.name} - AI Tool Details`}>
       <div className="container mx-auto px-4 py-8">
         <ToolDetailContent id={id} />
-        <CommentSection toolId={params.id} />
+        <CommentSection toolId={id} />
       </div>
     </Layout>
   );
