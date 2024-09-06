@@ -1,20 +1,31 @@
 'use client';
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { refreshToken } from '@/lib/auth';
 import { User } from '@/types/user';
 
+// 定义 AuthContext 的类型
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
-  isAdmin: () => boolean;
+  isAdmin: () => boolean;  // 确保这行存在
   token: string | null;
-  updateUser: (userData: Partial<User>) => Promise<void>; // 添加这一行
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+// 创建 AuthContext
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// 修改 useAuth 钩子
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

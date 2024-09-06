@@ -1,0 +1,1 @@
+{"level":"error","message":"API Error User_1.default.findById(...).select is not a function","service":"ai-tools-navigator","timestamp":"2024-09-06T08:16:42.301Z","url":"http://localhost/api/users/profile"}

@@ -1,12 +1,20 @@
 'use client';
 
 import { useContext } from 'react';
-import { AuthContext } from '@/components/AuthProvider';
+import { AuthContext, AuthContextType } from '@/components/AuthProvider';
 
-export function useAuth() {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === null) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) {
+    return {
+      user: null,
+      login: async () => {},
+      logout: () => {},
+      isAuthenticated: false,
+      isAdmin: () => false,
+      token: null,
+      updateUser: async () => {},
+    };
   }
   return context;
-}
+};

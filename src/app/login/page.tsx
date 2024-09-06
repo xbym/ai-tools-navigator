@@ -2,25 +2,24 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Layout from '@/components/Layout';
-import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';  // 添加这行
+import { useAuth } from '@/components/AuthProvider';
+import Layout from '@/components/Layout';  // 添加这行
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login } = useAuth();
+  const auth = useAuth();  // 这里不再需要解构，因为 useAuth 总是返回完整的 AuthContextType
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     try {
-      await login(email, password);
+      await auth.login(email, password);
       router.push('/');
-    } catch (error) {
+    } catch (err) {
       setError('登录失败，请检查您的邮箱和密码');
     }
   };

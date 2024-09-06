@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       if (!user) {
         return NextResponse.json({ message: '用户不存在' }, { status: 404 });
       }
-      return NextResponse.json(user);
+      return NextResponse.json(user, { status: 200 }); // 确保这里明确设置了状态码
     } catch (error) {
       return errorHandler(error, request);
     }
