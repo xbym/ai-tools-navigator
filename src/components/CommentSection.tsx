@@ -18,13 +18,14 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
-  const { user } = useAuth();
+  const { user, token } = useAuth();  // 获取token
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchComments = async (page: number) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/tools/${toolId}/comments?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
+      const response = await fetch(`/api/tools/${toolId}/comments?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${searchQuery}`);
       if (!response.ok) {
         throw new Error('Failed to fetch comments');
       }
@@ -42,7 +43,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
 
   useEffect(() => {
     fetchComments(currentPage);
-  }, [toolId, currentPage, sortBy, sortOrder]);
+  }, [toolId, currentPage, sortBy, sortOrder, searchQuery]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -104,11 +105,57 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     fetchComments(1); // 重新加载第一页评论
   };
 
+  const handleReaction = async (commentId: string, reaction: 'like' | 'dislike') => {
+    if (!user || !token) {
+      alert('请先登录后再进行操作');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reaction`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // 添加认证令牌
+        },
+        body: JSON.stringify({ reaction }),
+      });
+
+      if (response.ok) {
+        const updatedComment = await response.json();
+        setComments(comments.map(comment => 
+          comment._id === commentId ? { ...comment, ...updatedComment } : comment
+        ));
+      } else {
+        // 处理错误
+        console.error('Failed to update reaction');
+      }
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+    }
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
-      <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
-      <div className="mb-4 mt-6">
+      {user ? (
+        <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
+      ) : (
+        <p className="text-white mb-4">请登录后发表评论</p>
+      )}
+      <div className="mb-4 mt-6 flex items-center">
+        <input
+          type="text"
+          placeholder="搜索评论..."
+          value={searchQuery}
+          onChange={handleSearch}
+          className="bg-gray-700 text-white p-2 rounded mr-2 flex-grow"
+        />
         <select
           onChange={handleSortChange}
           className="bg-gray-700 text-white p-2 rounded"
@@ -146,6 +193,20 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                 <>
                   <p className="text-white">{comment.content}</p>
                   <p className="text-yellow-400">评分: {comment.rating}</p>
+                  <div className="mt-2 flex items-center">
+                    <button 
+                      onClick={() => handleReaction(comment._id, 'like')}
+                      className={`mr-2 ${comment.userReaction === 'like' ? 'text-blue-500' : 'text-gray-400'}`}
+                    >
+                      👍 {comment.likes}
+                    </button>
+                    <button 
+                      onClick={() => handleReaction(comment._id, 'dislike')}
+                      className={`mr-2 ${comment.userReaction === 'dislike' ? 'text-red-500' : 'text-gray-400'}`}
+                    >
+                      👎 {comment.dislikes}
+                    </button>
+                  </div>
                   {user && user.id === comment.user.id && (
                     <div className="mt-2">
                       <button onClick={() => setEditingCommentId(comment._id)} className="text-blue-400 mr-2">

@@ -5,6 +5,14 @@ import { authMiddleware } from '@/middleware/authMiddleware';
 import { errorHandler } from '@/middleware/errorHandler';
 import mongoose from 'mongoose';  // 添加这行
 import { logger } from '@/utils/logger';  // 添加这行
+import jwt from 'jsonwebtoken';  // 添加这行
+
+// 添加这个类型声明
+declare module 'jsonwebtoken' {
+  export interface JwtPayload {
+    userId: string;
+  }
+}
 
 // 定义评论的接口
 interface IComment {
@@ -63,6 +71,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '10');
     const sortBy = request.nextUrl.searchParams.get('sortBy') || 'createdAt';
     const sortOrder = request.nextUrl.searchParams.get('sortOrder') || 'desc';
+    const searchQuery = request.nextUrl.searchParams.get('search') || '';
 
     const skip = (page - 1) * limit;
 
@@ -74,9 +83,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const sortOptions: { [key: string]: 1 | -1 } = {};
     sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
+    const searchFilter = searchQuery
+      ? { $match: { 'comments.content': { $regex: searchQuery, $options: 'i' } } }
+      : { $match: {} };
+
     const comments = await AITool.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(toolId) } },  // 修改这行
+      { $match: { _id: new mongoose.Types.ObjectId(toolId) } },
       { $unwind: '$comments' },
+      searchFilter,
       { $sort: sortOptions },
       { $skip: skip },
       { $limit: limit },
@@ -94,6 +108,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           content: '$comments.content',
           rating: '$comments.rating',
           createdAt: '$comments.createdAt',
+          likes: '$comments.likes',
+          dislikes: '$comments.dislikes',
+          userReactions: '$comments.userReactions',
           user: { $arrayElemAt: ['$user', 0] }
         }
       },
@@ -108,18 +125,34 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const result = comments[0] || { comments: [], total: 0 };
 
+    // 尝试从请求中获取用户ID,如果没有则为null
+    let userId = null;
+    try {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
+        userId = decoded.userId;
+      }
+    } catch (error) {
+      logger.warn('Failed to decode token:', error);
+    }
+
     return NextResponse.json({
       comments: result.comments.map((comment: any) => ({
         ...comment,
         user: comment.user ? {
-          id: comment.user._id.toString(), // 确保将 ObjectId 转换为字符串
+          id: comment.user._id.toString(),
           username: comment.user.username || '匿名用户',
           avatarUrl: comment.user.avatarUrl || '/default-avatar.png'
         } : {
           id: null,
           username: '匿名用户',
           avatarUrl: '/default-avatar.png'
-        }
+        },
+        likes: comment.likes || 0,
+        dislikes: comment.dislikes || 0,
+        userReaction: userId ? comment.userReactions?.find((r: any) => r.userId.toString() === userId)?.reaction || null : null
       })),
       currentPage: page,
       totalPages: Math.ceil(result.total / limit),

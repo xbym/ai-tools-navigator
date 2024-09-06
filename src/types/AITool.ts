@@ -17,13 +17,16 @@ export interface Comment {
   _id: string;
   userId: string;
   user: {
-    id: string;  // 添加这行
+    id: string;
     username: string;
     avatarUrl: string;
   };
   content: string;
   rating: number;
   createdAt: string;
+  likes: number;
+  dislikes: number;
+  userReaction?: 'like' | 'dislike' | null;
 }
 
 export interface Rating {

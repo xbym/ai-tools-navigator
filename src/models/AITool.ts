@@ -29,6 +29,12 @@ const CommentSchema = new mongoose.Schema({
     max: [5, 'Rating cannot be more than 5']
   },
   createdAt: { type: Date, default: Date.now },
+  likes: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
+  userReactions: [{ 
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    reaction: { type: String, enum: ['like', 'dislike'] }
+  }]
 });
 
 interface IComment {

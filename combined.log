@@ -240,3 +240,49 @@
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:12:56.827Z"}
 {"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:12:56.848Z"}
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:12:56.858Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:04.720Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:05.078Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:05.100Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:05.135Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:10.634Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:10.646Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:10.658Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:10.671Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:14.578Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:18:14.601Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:19:34.621Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:19:34.637Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:19:34.652Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:19:34.662Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:15.740Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:15.993Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:16.012Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:16.022Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:19.231Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:19.243Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:19.257Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:19.271Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:27.286Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:27.584Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:30.590Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:21:31.150Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:22:03.335Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:22:03.347Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:22:03.359Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:22:03.370Z"}
+{"level":"warn","message":"No token provided in request","service":"ai-tools-navigator","timestamp":"2024-09-06T13:22:05.850Z"}
+{"level":"error","message":"API Error Cannot read properties of undefined (reading 'findIndex')","method":"POST","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:38.269Z","url":"http://localhost:3000/api/tools/66d7c5504d7f894acdbf139c/comments/66dafbd8dc4cb89097488c7f/reaction"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:55.392Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:55.404Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:55.420Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:55.430Z"}
+{"level":"error","message":"API Error Cannot read properties of undefined (reading 'findIndex')","method":"POST","service":"ai-tools-navigator","timestamp":"2024-09-06T13:24:57.478Z","url":"http://localhost:3000/api/tools/66d7c5504d7f894acdbf139c/comments/66dafbd8dc4cb89097488c7f/reaction"}
+{"level":"error","message":"API Error Cannot read properties of undefined (reading 'findIndex')","method":"POST","service":"ai-tools-navigator","timestamp":"2024-09-06T13:25:01.112Z","url":"http://localhost:3000/api/tools/66d7c5504d7f894acdbf139c/comments/66dafbd8dc4cb89097488c7f/reaction"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T14:02:12.369Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T14:02:12.623Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T14:02:12.644Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T14:02:12.656Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T14:05:28.082Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T14:05:28.095Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T14:05:28.106Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T14:05:28.116Z"}
