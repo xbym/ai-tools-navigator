@@ -4,6 +4,11 @@ import AITool from '@/models/AITool'
 import dbConnect from '@/lib/dbConnect'
 import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
+import dynamic from 'next/dynamic'
+
+const CommentSection = dynamic(() => import('@/components/CommentSection'), {
+  ssr: false,
+})
 
 type Props = {
   params: { id: string }
@@ -45,6 +50,7 @@ export default async function ToolDetail({ params }: Props) {
     <Layout title={`${tool.name} - AI Tool Details`}>
       <div className="container mx-auto px-4 py-8">
         <ToolDetailContent id={id} />
+        <CommentSection toolId={params.id} />
       </div>
     </Layout>
   );
