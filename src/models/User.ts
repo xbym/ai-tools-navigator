@@ -56,13 +56,6 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
     const isMatch = await bcrypt.compare(candidatePassword, this.password);
     console.log('bcrypt.compare result:', isMatch);
     
-    // 添加额外的调试信息
-    const salt = this.password.split('$')[3];
-    console.log('Extracted salt:', salt);
-    const manualHash = await bcrypt.hash(candidatePassword, salt);
-    console.log('Manual hash with extracted salt:', manualHash);
-    console.log('Manual comparison result:', this.password === manualHash);
-    
     return isMatch;
   } catch (error) {
     console.error('Error comparing passwords:', error);

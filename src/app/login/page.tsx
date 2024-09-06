@@ -2,25 +2,26 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';  // 添加这行
-import { useAuth } from '@/components/AuthProvider';
-import Layout from '@/components/Layout';  // 添加这行
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/contexts/ToastContext';
+import Layout from '@/components/Layout';
+import Link from 'next/link';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const router = useRouter();
-  const auth = useAuth();  // 这里不再需要解构，因为 useAuth 总是返回完整的 AuthContextType
+  const { login } = useAuth();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
-      await auth.login(email, password);
+      await login(email, password);
+      showToast('登录成功', 'success');
       router.push('/');
-    } catch (err) {
-      setError('登录失败，请检查您的邮箱和密码');
+    } catch (error) {
+      showToast('登录失败', 'error');
     }
   };
 
@@ -28,7 +29,6 @@ export default function Login() {
     <Layout title="登录 - AI工具导航">
       <div className="max-w-md mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
         <h1 className="text-2xl font-bold mb-6 text-white">登录</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block mb-1 text-gray-300">邮箱</label>

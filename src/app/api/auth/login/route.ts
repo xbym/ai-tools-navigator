@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { errorHandler } from '@/middleware/errorHandler';
 
 export async function POST(request: NextRequest) {
@@ -29,12 +28,14 @@ export async function POST(request: NextRequest) {
 
     // 比较密码
     console.log('About to compare passwords');
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Direct bcrypt.compare result:', isMatch);
-
-    // 保留原来的比较方法作为备份
-    const isMatchFromMethod = await user.comparePassword(password);
-    console.log('comparePassword method result:', isMatchFromMethod);
+    let isMatch;
+    try {
+      isMatch = await user.comparePassword(password);
+    } catch (error) {
+      console.error('Error during password comparison:', error);
+      return NextResponse.json({ message: '登录过程中出现错误' }, { status: 500 });
+    }
+    console.log('Password comparison result:', isMatch);
 
     if (!isMatch) {
       console.log('Password mismatch, returning error response');
