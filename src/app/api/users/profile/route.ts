@@ -1,23 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { errorHandler } from '@/middleware/errorHandler';
 import { authMiddleware } from '@/middleware/authMiddleware';
-import { logger } from '@/utils/logger';
-import dbConnect from '@/lib/dbConnect';
+import { errorHandler } from '@/middleware/errorHandler';
 import User from '@/models/User';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
-      logger.info('Fetching user profile');
-      await dbConnect();
-
       const user = await User.findById(userId).select('-password');
       if (!user) {
-        logger.warn('Profile fetch failed: User not found', { userId });
-        return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        return NextResponse.json({ message: '用户不存在' }, { status: 404 });
       }
+      return NextResponse.json(user);
+    } catch (error) {
+      return errorHandler(error, request);
+    }
+  });
+}
 
-      logger.info('Profile fetched successfully', { userId: user._id });
+// 如果需要，可以添加 PUT 方法来更新用户资料
+export async function PUT(request: NextRequest) {
+  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+    try {
+      const data = await req.json();
+      const user = await User.findByIdAndUpdate(userId, data, { new: true }).select('-password');
+      if (!user) {
+        return NextResponse.json({ message: '用户不存在' }, { status: 404 });
+      }
       return NextResponse.json(user);
     } catch (error) {
       return errorHandler(error, request);

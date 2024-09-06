@@ -2,21 +2,15 @@
 
 import React, { createContext, useState, useEffect } from 'react';
 import { refreshToken } from '@/lib/auth';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'user' | 'admin';
-}
+import { User } from '@/types/user';
 
 export interface AuthContextType {
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: () => boolean;
+  token: string | null;
   updateUser: (userData: Partial<User>) => Promise<void>; // 添加这一行
 }
 
@@ -26,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -63,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true);
         localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('token', token);
+        setToken(token);
       } else {
         throw new Error('Login failed');
       }
@@ -77,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    setToken(null);
   };
 
   const isAdmin = () => {
@@ -85,11 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateUser = async (userData: Partial<User>) => {
     try {
-      const response = await fetch('/api/user/update', {
+      const response = await fetch('/api/users/update-profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(userData),
       });
@@ -111,8 +108,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return <div>Loading...</div>; // 或者使用一个加载指示器组件
   }
 
+  const value = {
+    user,
+    login,
+    logout,
+    isAuthenticated: !!user,
+    isAdmin: () => user?.role === 'admin',
+    token,
+    updateUser, // 添加这一行
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, isAuthenticated, isAdmin, updateUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

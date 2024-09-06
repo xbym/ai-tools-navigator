@@ -3,8 +3,8 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://your-domain.com
+Host: https://ai-tools-navigator.vercel.app
 
 # Sitemaps
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://ai-tools-navigator.vercel.app/sitemap.xml
 Sitemap: https://your-domain.com/api/sitemap.xml

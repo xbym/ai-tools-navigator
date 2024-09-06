@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { User } from '@/types/user';
 
 interface EditProfileFormProps {
   onCancel: () => void;

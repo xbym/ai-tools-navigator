@@ -1,5 +1,5 @@
 module.exports = {
-  siteUrl: process.env.SITE_URL || 'https://your-domain.com',
+  siteUrl: 'https://ai-tools-navigator.vercel.app',
   generateRobotsTxt: true,
   exclude: ['/admin', '/admin/*'],
   robotsTxtOptions: {

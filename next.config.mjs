@@ -6,6 +6,9 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  images: {
+    domains: ['res.cloudinary.com'], // 确保这里包含了你的Cloudinary域名
+  },
 };
 
 export default withSentryConfig(
