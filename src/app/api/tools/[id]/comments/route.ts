@@ -112,9 +112,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       comments: result.comments.map((comment: any) => ({
         ...comment,
         user: comment.user ? {
+          id: comment.user._id.toString(), // 确保将 ObjectId 转换为字符串
           username: comment.user.username || '匿名用户',
           avatarUrl: comment.user.avatarUrl || '/default-avatar.png'
         } : {
+          id: null,
           username: '匿名用户',
           avatarUrl: '/default-avatar.png'
         }
@@ -130,34 +132,31 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // 添加新的路由处理函数
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
-    try {
-      await dbConnect();
-      const { commentId, content, rating } = await req.json();
-      const tool = await AITool.findById(params.id);
+  try {
+    await dbConnect();
+    const toolId = params.id;
+    const { commentId, content, rating } = await request.json();
 
-      if (!tool) {
-        return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
-      }
-
-      const comment = tool.comments.id(commentId);
-      if (!comment) {
-        return NextResponse.json({ message: '评论不存在' }, { status: 404 });
-      }
-
-      if (comment.userId.toString() !== userId) {
-        return NextResponse.json({ message: '无权编辑此评论' }, { status: 403 });
-      }
-
-      comment.content = content;
-      comment.rating = rating;
-      await tool.save();
-
-      return NextResponse.json({ message: '评论已更新' });
-    } catch (error) {
-      return errorHandler(error, request);
+    const tool = await AITool.findById(toolId);
+    if (!tool) {
+      return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
     }
-  });
+
+    const comment = tool.comments.id(commentId);
+    if (!comment) {
+      return NextResponse.json({ message: 'Comment not found' }, { status: 404 });
+    }
+
+    // 更新评论
+    comment.content = content;
+    comment.rating = rating;
+    await tool.save();
+
+    return NextResponse.json({ message: 'Comment updated successfully' });
+  } catch (error) {
+    console.error('Error updating comment:', error);
+    return NextResponse.json({ message: 'Error updating comment' }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {

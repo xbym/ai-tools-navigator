@@ -17,6 +17,7 @@ export interface Comment {
   _id: string;
   userId: string;
   user: {
+    id: string;  // 添加这行
     username: string;
     avatarUrl: string;
   };

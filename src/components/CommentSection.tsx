@@ -124,52 +124,39 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
       ) : comments.length > 0 ? (
         <>
           {comments.map((comment) => (
-            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg shadow flex items-start">
-              <Image
-                src={comment.user?.avatarUrl || '/default-avatar.png'}
-                alt={`${comment.user?.username || '匿名用户'}'s avatar`}
-                width={40}
-                height={40}
-                className="rounded-full mr-4"
-                onError={(e) => {
-                  // 如果图片加载失败，使用默认头像
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null; // 防止无限循环
-                  target.src = '/default-avatar.png';
-                }}
-              />
-              <div className="flex-grow">
-                {editingCommentId === comment._id ? (
-                  <EditCommentForm
-                    initialContent={comment.content}
-                    initialRating={comment.rating}
-                    onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
-                    onCancel={() => setEditingCommentId(null)}
-                  />
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-blue-300">
-                        {comment.user?.username || '匿名用户'}
-                      </span>
-                      <span className="text-yellow-400">评分: {comment.rating}/5</span>
-                    </div>
-                    <p className="text-gray-200">{comment.content}</p>
-                    <span className="text-sm text-gray-400">
-                      {new Date(comment.createdAt).toLocaleString()}
-                    </span>
-                  </>
-                )}
+            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg">
+              <div className="flex items-center mb-2">
+                <Image
+                  src={comment.user.avatarUrl}
+                  alt={comment.user.username}
+                  width={40}
+                  height={40}
+                  className="rounded-full mr-2"
+                />
+                <span className="font-bold text-white">{comment.user.username}</span>
               </div>
-              {user && user.id === comment.userId && (
-                <div className="ml-auto">
-                  {editingCommentId === comment._id ? null : (
-                    <>
-                      <button onClick={() => setEditingCommentId(comment._id)}>编辑</button>
-                      <button onClick={() => handleDeleteComment(comment._id)}>删除</button>
-                    </>
+              {editingCommentId === comment._id ? (
+                <EditCommentForm
+                  initialContent={comment.content}
+                  initialRating={comment.rating}
+                  onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
+                  onCancel={() => setEditingCommentId(null)}
+                />
+              ) : (
+                <>
+                  <p className="text-white">{comment.content}</p>
+                  <p className="text-yellow-400">评分: {comment.rating}</p>
+                  {user && user.id === comment.user.id && (
+                    <div className="mt-2">
+                      <button onClick={() => setEditingCommentId(comment._id)} className="text-blue-400 mr-2">
+                        编辑
+                      </button>
+                      <button onClick={() => handleDeleteComment(comment._id)} className="text-red-400">
+                        删除
+                      </button>
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           ))}

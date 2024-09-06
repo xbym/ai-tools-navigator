@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  avatarUrl: { type: String, default: '' },
+  avatarUrl: { type: String, default: '/default-avatar.png' },
   resetToken: String,
   resetTokenExpiry: Date,
   lastPasswordReset: Date,
