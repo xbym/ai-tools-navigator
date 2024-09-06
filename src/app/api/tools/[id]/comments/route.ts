@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
-import User from '@/models/User';
+import { authMiddleware } from '@/middleware/authMiddleware';
 import { errorHandler } from '@/middleware/errorHandler';
-import { authMiddleware } from '@/middleware/authMiddleware'; // 添加这行
-import { Types } from 'mongoose'; // 添加这行
+import mongoose from 'mongoose';  // 添加这行
 
 // 定义评论的接口
 interface IComment {
@@ -17,19 +16,23 @@ interface IComment {
 
 // 定义用户文档的接口
 interface IUser {
-  _id: Types.ObjectId;
+  _id: mongoose.Types.ObjectId;  // 修改这行
   username: string;
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
+      await dbConnect();
       const { content, rating } = await req.json();
       const tool = await AITool.findById(params.id);
 
       if (!tool) {
         return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
       }
+
+      // 添加一个小延迟,模拟网络延迟
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       tool.comments.push({ userId, content, rating });
       tool.updateAverageRating();
@@ -62,7 +65,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     const comments = await AITool.aggregate([
-      { $match: { _id: new Types.ObjectId(toolId) } },
+      { $match: { _id: new mongoose.Types.ObjectId(toolId) } },  // 修改这行
       { $unwind: '$comments' },
       { $sort: sortOptions },
       { $skip: skip },
