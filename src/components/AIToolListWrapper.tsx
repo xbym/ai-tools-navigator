@@ -1,37 +1,36 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/utils/api';
 import AIToolList from './AIToolList';
 import { AITool } from '@/types/AITool';
 
 export default function AIToolListWrapper() {
   const [tools, setTools] = useState<AITool[]>([]);
   const [filteredTools, setFilteredTools] = useState<AITool[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
 
   useEffect(() => {
-    const fetchTools = async () => {
+    async function fetchTools() {
       try {
-        console.log('Fetching tools...');
-        const response = await fetch('/api/tools');
+        const response = await apiFetch('/api/tools');
         if (!response.ok) {
           throw new Error('Failed to fetch tools');
         }
         const data = await response.json();
-        console.log('Fetched tools:', data.tools);
         setTools(data.tools);
         setFilteredTools(data.tools);
       } catch (err) {
-        console.error('Error fetching tools:', err);
-        setError('Error loading tools');
+        setError('Error fetching tools');
+        console.error(err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    };
+    }
 
     fetchTools();
   }, []);
@@ -52,7 +51,7 @@ export default function AIToolListWrapper() {
 
   console.log('Rendering AIToolListWrapper, filteredTools:', filteredTools);
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 

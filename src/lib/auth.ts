@@ -33,3 +33,12 @@ export function isTokenExpired(token: string): boolean {
     return true;
   }
 }
+
+export async function verifyToken(token: string): Promise<{ userId: string } | null> {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
+    return decoded;
+  } catch (error) {
+    return null;
+  }
+}

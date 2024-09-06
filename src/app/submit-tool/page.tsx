@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'; // 添加这行
+import { apiFetch } from '@/utils/api';
 import Layout from '@/components/Layout';
 import ImageUpload from '@/components/ImageUpload';
-import Image from 'next/image';
 
 export default function SubmitToolPage() {
-  const router = useRouter();
   const [toolData, setToolData] = useState({
     name: '',
     description: '',
@@ -17,6 +17,8 @@ export default function SubmitToolPage() {
     iconUrl: '',
     screenshotUrl: '',
   });
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setToolData({ ...toolData, [e.target.name]: e.target.value });
@@ -32,28 +34,28 @@ export default function SubmitToolPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     try {
-      const response = await fetch('/api/tools', {
+      const response = await apiFetch('/api/tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...toolData,
-          tags: toolData.tags.split(',').map(tag => tag.trim()),
-        }),
+        body: JSON.stringify(toolData),
       });
-      if (response.ok) {
-        router.push('/');
-      } else {
+
+      if (!response.ok) {
         throw new Error('Failed to submit tool');
       }
-    } catch (error) {
-      console.error('Error submitting tool:', error);
-      // 这里可以添加错误处理逻辑，比如显示错误消息给用户
+
+      router.push('/');
+    } catch (err) {
+      setError('Error submitting tool. Please try again.');
+      console.error(err);
     }
   };
 
   return (
-    <Layout title="提交新工具 - AI工具导航" description="提交新的AI工具到我们的导航网站">
+    <Layout title="Submit AI Tool - AI Tools Navigator">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-blue-400">提交新工具</h1>
         <form onSubmit={handleSubmit} className="space-y-6">

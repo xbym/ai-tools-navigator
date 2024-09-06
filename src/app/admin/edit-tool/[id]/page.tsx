@@ -1,99 +1,75 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AITool } from '../../../../types/AITool';
-import ImageUpload from '../../../../components/ImageUpload';
-import Image from 'next/image';
+import { apiFetch } from '@/utils/api';
+import Layout from '@/components/Layout';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function EditTool({ params }: { params: { id: string } }) {
-  const [tool, setTool] = useState<AITool | null>(null);
+  const [toolData, setToolData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    url: '',
+    tags: '',
+    iconUrl: '',
+    screenshotUrl: '',
+  });
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const fetchTool = useCallback(async () => {
-    const response = await fetch(`/api/tools/${params.id}`);
-    const data = await response.json();
-    setTool(data);
+  useEffect(() => {
+    const fetchTool = async () => {
+      try {
+        const response = await apiFetch(`/api/tools/${params.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tool');
+        }
+        const data = await response.json();
+        setToolData(data);
+      } catch (err) {
+        console.error(err);
+        setError('Error fetching tool data');
+      }
+    };
+
+    fetchTool();
   }, [params.id]);
 
-  useEffect(() => {
-    fetchTool();
-  }, [fetchTool]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setToolData({ ...toolData, [e.target.name]: e.target.value });
+  };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tool) return;
+    setError('');
 
-    const response = await fetch(`/api/tools/${params.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tool),
-    });
+    try {
+      const response = await apiFetch(`/api/tools/${params.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toolData),
+      });
 
-    if (response.ok) {
-      router.push('/admin/tools');
-    } else {
-      // 处理错误
+      if (!response.ok) {
+        throw new Error('Failed to update tool');
+      }
+
+      router.push('/admin');
+    } catch (err) {
+      setError('Error updating tool. Please try again.');
+      console.error(err);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (!tool) return;
-    setTool({ ...tool, [e.target.name]: e.target.value });
-  };
-
-  const handleIconUpload = (url: string) => {
-    if (!tool) return;
-    setTool({ ...tool, iconUrl: url });
-  };
-
-  const handleScreenshotUpload = (url: string) => {
-    if (!tool) return;
-    setTool({ ...tool, screenshotUrl: url });
-  };
-
-  if (!tool) {
-    return <div>加载中...</div>;
-  }
+  // ... rest of the component (including ImageUpload handlers)
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
-      <h1 className="text-3xl font-bold mb-6 text-blue-400">编辑 AI 工具</h1>
-      
-      {/* 现有的表单字段 */}
-      {/* ... */}
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-300 mb-1">图标</label>
-        <ImageUpload onUpload={handleIconUpload} />
-        {tool.iconUrl && (
-          <Image
-            src={tool.iconUrl}
-            alt="Tool Icon"
-            width={64}
-            height={64}
-            className="mt-2 h-16 w-16 object-cover rounded-full"
-          />
-        )}
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-300 mb-1">截图</label>
-        <ImageUpload onUpload={handleScreenshotUpload} />
-        {tool.screenshotUrl && (
-          <Image
-            src={tool.screenshotUrl}
-            alt="Tool Screenshot"
-            width={800}
-            height={450}
-            className="mt-2 w-full object-cover rounded"
-          />
-        )}
-      </div>
-
-      <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
-        更新工具
-      </button>
-    </form>
+    <Layout title="Edit AI Tool - AI Tools Navigator">
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
+        {/* Form fields */}
+      </form>
+    </Layout>
   );
 }

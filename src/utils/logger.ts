@@ -1,42 +1,23 @@
-type LogLevel = 'info' | 'warn' | 'error';
+import winston from 'winston';
 
-class Logger {
-  private static instance: Logger;
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'ai-tools-navigator' },
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
+});
 
-  private constructor() {}
-
-  public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-    }
-    return Logger.instance;
-  }
-
-  private log(level: LogLevel, message: string, meta?: any) {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      message,
-      meta,
-    };
-
-    console[level](JSON.stringify(logEntry));
-
-    // 这里可以添加将日志保存到文件或发送到远程服务的逻辑
-  }
-
-  public info(message: string, meta?: any) {
-    this.log('info', message, meta);
-  }
-
-  public warn(message: string, meta?: any) {
-    this.log('warn', message, meta);
-  }
-
-  public error(message: string, meta?: any) {
-    this.log('error', message, meta);
-  }
+// 在非生产环境下，还要将日志打印到控制台
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
 }
 
-export const logger = Logger.getInstance();
+export { logger };

@@ -1,16 +1,14 @@
 "use client";
 
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo } from 'react';
 import * as Sentry from "@sentry/nextjs";
-import { logClientError } from '@/lib/clientErrorLogger';
 
 interface ErrorBoundaryProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error;
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -19,25 +17,18 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+    return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
     Sentry.captureException(error);
-    logClientError(error, window.location.href);
-    this.setState({ hasError: true, error });
   }
 
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="error-boundary p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          <h1 className="text-xl font-bold mb-2">出错了</h1>
-          <p>{this.state.error?.message || '发生了意外错误。'}</p>
-        </div>
-      );
+      return <h1>抱歉，出现了错误。</h1>;
     }
 
     return this.props.children;

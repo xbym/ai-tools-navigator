@@ -1,37 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { errorHandler } from '@/middleware/errorHandler';
+import { logger } from '@/utils/logger';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
 
-export async function POST(req: NextRequest) {
-	await dbConnect();
-
-	const { email } = await req.json();
-
+export async function POST(request: NextRequest) {
 	try {
-		const user = await User.findOne({ email });
+		logger.info('Password reset request');
+		await dbConnect();
+		const { email } = await request.json();
 
+		const user = await User.findOne({ email });
 		if (!user) {
-			// 即使用户不存在，我们也返回成功以防止邮箱枚举攻击
+			logger.warn('Password reset failed: User not found', { email });
+			// 为了防止邮箱枚举攻击，我们返回相同的消息
 			return NextResponse.json({ message: 'If the email exists, a reset link has been sent.' });
 		}
 
 		const resetToken = crypto.randomBytes(20).toString('hex');
-		const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
-
 		user.resetToken = resetToken;
-		user.resetTokenExpiry = resetTokenExpiry;
+		user.resetTokenExpiry = new Date(Date.now() + 3600000); // 修改这一行
 		await user.save();
-		console.log('Reset token saved for user');
 
 		const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
-
 		await sendPasswordResetEmail(user.email, resetUrl, user.username);
 
+		logger.info('Password reset email sent', { userId: user._id });
 		return NextResponse.json({ message: 'If the email exists, a reset link has been sent.' });
 	} catch (error) {
-		console.error('Password reset error:', error);
-		return NextResponse.json({ message: 'Error sending reset link' }, { status: 500 });
+		return errorHandler(error, request);
 	}
 }

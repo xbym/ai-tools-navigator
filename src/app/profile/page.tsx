@@ -1,61 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import Layout from '@/components/Layout';
+import { apiFetch } from '@/utils/api';
 import { useRouter } from 'next/navigation';
-import EditProfileForm from '@/components/EditProfileForm';
+import Layout from '@/components/Layout';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else {
-      setIsLoading(false);
+    async function fetchProfile() {
+      try {
+        const response = await apiFetch('/api/users/profile');
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+        const data = await response.json();
+        setUser(data);
+      } catch (err) {
+        console.error(err);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [isAuthenticated, router]);
+
+    fetchProfile();
+  }, [router]);
 
   if (isLoading) {
-    return <div>加载中...</div>;
+    return <div>Loading...</div>;
   }
 
-  return (
-    <Layout title="个人资料 - AI工具导航">
-      <div className="max-w-2xl mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-xl">
-        <h1 className="text-3xl font-bold mb-6 text-white">个人资料</h1>
-        {user && (
-          <>
-            {isEditing ? (
-              <EditProfileForm
-                onCancel={() => setIsEditing(false)}
-                onSuccess={() => setIsEditing(false)}
-              />
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300">用户名</label>
-                  <p className="mt-1 text-lg text-white">{user.username}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300">电子邮件</label>
-                  <p className="mt-1 text-lg text-white">{user.email}</p>
-                </div>
-                <button
-                  className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
-                  onClick={() => setIsEditing(true)}
-                >
-                  编辑资料
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </Layout>
-  );
+  // ... rest of the component
 }
