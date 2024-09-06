@@ -71,3 +71,13 @@
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:21:16.633Z"}
 {"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:21:16.655Z"}
 {"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:21:16.664Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:05.463Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:05.818Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:05.838Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:05.852Z"}
+{"level":"error","message":"API Error Cannot read properties of undefined (reading 'username')","method":"GET","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:10.399Z","url":"http://localhost:3000/api/tools/66d7c5504d7f894acdbf139c/comments?page=1&sortBy=createdAt&sortOrder=desc"}
+{"level":"error","message":"API Error Cannot read properties of undefined (reading 'username')","method":"GET","service":"ai-tools-navigator","timestamp":"2024-09-06T09:30:10.441Z","url":"http://localhost:3000/api/tools/66d7c5504d7f894acdbf139c/comments?page=1&sortBy=createdAt&sortOrder=desc"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:37.917Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.226Z"}
+{"level":"info","message":"Fetching tools","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.249Z"}
+{"level":"info","message":"Tools fetched successfully","service":"ai-tools-navigator","timestamp":"2024-09-06T09:34:38.260Z"}

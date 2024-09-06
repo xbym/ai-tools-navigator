@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Comment } from '@/types/AITool';
+import Image from 'next/image';
 
 interface CommentSectionProps {
   toolId: string;
@@ -21,13 +22,16 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/tools/${toolId}/comments?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
-      if (!response.ok) throw new Error('Failed to fetch comments');
+      if (!response.ok) {
+        throw new Error('Failed to fetch comments');
+      }
       const data = await response.json();
       setComments(data.comments);
       setCurrentPage(data.currentPage);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching comments:', error);
+      // 可以在这里添加一些用户友好的错误提示
     } finally {
       setIsLoading(false);
     }
@@ -66,22 +70,35 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
       </div>
       {isLoading ? (
         <p className="text-white">加载中...</p>
-      ) : (
+      ) : comments.length > 0 ? (
         <>
           {comments.map((comment) => (
-            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg shadow">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-blue-300">
-                  {typeof comment.userId === 'object' && comment.userId.username
-                    ? comment.userId.username
-                    : '匿名用户'}
+            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg shadow flex items-start">
+              <Image
+                src={comment.user?.avatarUrl || '/default-avatar.png'}
+                alt={`${comment.user?.username || '匿名用户'}'s avatar`}
+                width={40}
+                height={40}
+                className="rounded-full mr-4"
+                onError={(e) => {
+                  // 如果图片加载失败，使用默认头像
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null; // 防止无限循环
+                  target.src = '/default-avatar.png';
+                }}
+              />
+              <div className="flex-grow">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold text-blue-300">
+                    {comment.user?.username || '匿名用户'}
+                  </span>
+                  <span className="text-yellow-400">评分: {comment.rating}/5</span>
+                </div>
+                <p className="text-gray-200">{comment.content}</p>
+                <span className="text-sm text-gray-400">
+                  {new Date(comment.createdAt).toLocaleString()}
                 </span>
-                <span className="text-yellow-400">评分: {comment.rating}/5</span>
               </div>
-              <p className="text-gray-200">{comment.content}</p>
-              <span className="text-sm text-gray-400">
-                {new Date(comment.createdAt).toLocaleString()}
-              </span>
             </div>
           ))}
           <div className="flex justify-center mt-4">
@@ -104,6 +121,8 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
             </button>
           </div>
         </>
+      ) : (
+        <p className="text-white">暂无评论</p>
       )}
     </div>
   );

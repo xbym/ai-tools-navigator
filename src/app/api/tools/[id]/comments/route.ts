@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
+import User from '@/models/User';
 import { errorHandler } from '@/middleware/errorHandler';
 import { authMiddleware } from '@/middleware/authMiddleware'; // 添加这行
 import { Types } from 'mongoose'; // 添加这行
@@ -61,22 +62,50 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     const comments = await AITool.aggregate([
-      { $match: { _id: tool._id } },
+      { $match: { _id: new Types.ObjectId(toolId) } },
       { $unwind: '$comments' },
       { $sort: sortOptions },
       { $skip: skip },
       { $limit: limit },
-      { $group: {
-        _id: null,
-        comments: { $push: '$comments' },
-        total: { $sum: 1 }
-      }}
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'comments.userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $project: {
+          _id: '$comments._id',
+          content: '$comments.content',
+          rating: '$comments.rating',
+          createdAt: '$comments.createdAt',
+          user: { $arrayElemAt: ['$user', 0] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          comments: { $push: '$$ROOT' },
+          total: { $sum: 1 }
+        }
+      }
     ]);
 
     const result = comments[0] || { comments: [], total: 0 };
 
     return NextResponse.json({
-      comments: result.comments,
+      comments: result.comments.map((comment: any) => ({
+        ...comment,
+        user: comment.user ? {
+          username: comment.user.username || '匿名用户',
+          avatarUrl: comment.user.avatarUrl || '/default-avatar.png'
+        } : {
+          username: '匿名用户',
+          avatarUrl: '/default-avatar.png'
+        }
+      })),
       currentPage: page,
       totalPages: Math.ceil(result.total / limit),
       totalComments: result.total

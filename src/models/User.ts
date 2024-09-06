@@ -6,10 +6,11 @@ interface IUser extends Document {
   email: string;
   password: string;
   role: 'user' | 'admin';
+  avatarUrl: string; // 新增头像字段
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
   resetTokenExpiry?: Date;
-  lastPasswordReset?: Date; // 添加这个字段
+  lastPasswordReset?: Date;
 }
 
 interface IUserModel extends Model<IUser> {
@@ -21,9 +22,10 @@ const UserSchema = new mongoose.Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  avatarUrl: { type: String, default: '' }, // 新增头像字段
   resetToken: String,
   resetTokenExpiry: Date,
-  lastPasswordReset: Date, // 添加这个字段
+  lastPasswordReset: Date,
 });
 
 UserSchema.pre<IUser>('save', async function(next) {
@@ -38,6 +40,6 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.models.User as IUserModel || mongoose.model<IUser, IUserModel>('User', UserSchema);
+const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 export default User;
