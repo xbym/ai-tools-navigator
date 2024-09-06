@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware } from '@/middleware/authMiddleware';
-import { errorHandler } from '@/middleware/errorHandler';
+import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
-import User from '@/models/User';
-import { Types } from 'mongoose';
+import { errorHandler } from '@/middleware/errorHandler';
+import { authMiddleware } from '@/middleware/authMiddleware'; // 添加这行
+import { Types } from 'mongoose'; // 添加这行
 
 // 定义评论的接口
 interface IComment {
@@ -43,43 +43,43 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    await dbConnect();
+    const toolId = params.id;
+    const page = parseInt(request.nextUrl.searchParams.get('page') || '1');
+    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '10');
+    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = request.nextUrl.searchParams.get('sortOrder') || 'desc';
+
     const skip = (page - 1) * limit;
 
-    const tool = await AITool.findById(params.id);
-
+    const tool = await AITool.findById(toolId);
     if (!tool) {
-      return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
+      return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
     }
 
-    const totalComments = tool.comments.length;
-    const paginatedComments = tool.comments.slice(skip, skip + limit);
+    const sortOptions: { [key: string]: 1 | -1 } = {};
+    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-    // 确保返回的评论数据结构正确
-    const formattedComments = await Promise.all(paginatedComments.map(async (comment: IComment) => {
-      let userId = comment.userId;
-      if (typeof userId === 'string') {
-        const user = await User.findById(userId).select('username') as IUser | null;
-        userId = user 
-          ? { _id: user._id.toString(), username: user.username } 
-          : { _id: userId, username: '匿名用户' };
-      }
-      return {
-        _id: comment._id,
-        userId,
-        content: comment.content,
-        rating: comment.rating,
-        createdAt: comment.createdAt
-      };
-    }));
+    const comments = await AITool.aggregate([
+      { $match: { _id: tool._id } },
+      { $unwind: '$comments' },
+      { $sort: sortOptions },
+      { $skip: skip },
+      { $limit: limit },
+      { $group: {
+        _id: null,
+        comments: { $push: '$comments' },
+        total: { $sum: 1 }
+      }}
+    ]);
+
+    const result = comments[0] || { comments: [], total: 0 };
 
     return NextResponse.json({
-      comments: formattedComments,
+      comments: result.comments,
       currentPage: page,
-      totalPages: Math.ceil(totalComments / limit),
-      totalComments
+      totalPages: Math.ceil(result.total / limit),
+      totalComments: result.total
     });
   } catch (error) {
     return errorHandler(error, request);

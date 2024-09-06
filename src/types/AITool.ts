@@ -15,8 +15,9 @@ export interface AITool {
 
 export interface Comment {
   _id: string;
-  userId: string;
+  userId: string | { _id: string; username: string };
   content: string;
+  rating: number;
   createdAt: string;
 }
 
