@@ -3,8 +3,6 @@ import { authMiddleware } from '@/middleware/authMiddleware';
 import { errorHandler } from '@/middleware/errorHandler';
 import User from '@/models/User';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
@@ -12,14 +10,13 @@ export async function GET(request: NextRequest) {
       if (!user) {
         return NextResponse.json({ message: '用户不存在' }, { status: 404 });
       }
-      return NextResponse.json(user, { status: 200 }); // 确保这里明确设置了状态码
+      return NextResponse.json(user);
     } catch (error) {
       return errorHandler(error, request);
     }
   });
 }
 
-// 如果需要，可以添加 PUT 方法来更新用户资料
 export async function PUT(request: NextRequest) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {

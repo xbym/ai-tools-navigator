@@ -118,7 +118,7 @@ export default function AddToolPage() {
         </div>
         <div>
           <label htmlFor="iconUrl" className="block mb-1">图标</label>
-          <ImageUpload onUpload={handleIconUpload} />
+          <ImageUpload onUpload={handleIconUpload} label="上传图标" />
           {toolData.iconUrl && (
             <Image
               src={toolData.iconUrl}
@@ -131,7 +131,7 @@ export default function AddToolPage() {
         </div>
         <div>
           <label htmlFor="screenshotUrl" className="block mb-1">截图</label>
-          <ImageUpload onUpload={handleScreenshotUpload} />
+          <ImageUpload onUpload={handleScreenshotUpload} label="上传截图" />
           {toolData.screenshotUrl && (
             <Image
               src={toolData.screenshotUrl}

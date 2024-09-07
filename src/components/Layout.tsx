@@ -12,7 +12,7 @@ interface LayoutProps {
 
 export default function Layout({ children, title = 'AI工具导航', description }: LayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-900 text-white">
       <Head>
         <title>{title}</title>
         {description && <meta name="description" content={description} />} {/* 添加这一行 */}

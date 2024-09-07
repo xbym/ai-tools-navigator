@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Comment } from '@/types/AITool';
 
@@ -8,13 +8,7 @@ export default function ReportedComments() {
   const [reportedComments, setReportedComments] = useState<Comment[]>([]);
   const { user, token } = useAuth();
 
-  useEffect(() => {
-    if (user && user.role === 'admin') {
-      fetchReportedComments();
-    }
-  }, [user]);
-
-  const fetchReportedComments = async () => {
+  const fetchReportedComments = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/reported-comments', {
         headers: {
@@ -28,7 +22,11 @@ export default function ReportedComments() {
     } catch (error) {
       console.error('Error fetching reported comments:', error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchReportedComments();
+  }, [fetchReportedComments]);
 
   const handleDeleteComment = async (toolId: string, commentId: string) => {
     try {

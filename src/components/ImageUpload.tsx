@@ -1,40 +1,56 @@
-import { CldUploadWidget } from 'next-cloudinary';
-import { useEffect, useState } from 'react';
+import React, { useRef } from 'react';
+import { useToast } from '@/hooks/useToast';
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
+  label: string;
 }
 
-export default function ImageUpload({ onUpload }: ImageUploadProps) {
-  const [cloudName, setCloudName] = useState<string | undefined>(undefined);
+export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
-  useEffect(() => {
-    setCloudName(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
-    console.log('Cloudinary Cloud Name:', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
-  }, []);
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  if (!cloudName) {
-    return <div>Loading Cloudinary configuration...</div>;
-  }
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('上传失败');
+      }
+
+      const data = await response.json();
+      onUpload(data.url);
+      showToast('图片上传成功', 'success');
+    } catch (error) {
+      console.error('上传错误:', error);
+      showToast('图片上传失败', 'error');
+    }
+  };
 
   return (
-    <CldUploadWidget
-      uploadPreset="ai_tools_navigator"
-      onUpload={(result: any) => {
-        if (result.event !== "success") return;
-        onUpload(result.info.secure_url);
-      }}
-    >
-      {({ open }) => {
-        return (
-          <button
-            onClick={() => open()}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            上传图片
-          </button>
-        );
-      }}
-    </CldUploadWidget>
+    <div>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        {label}
+      </button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleUpload}
+        accept="image/*"
+        className="hidden"
+      />
+    </div>
   );
 }

@@ -93,24 +93,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateUser = async (userData: Partial<User>) => {
     try {
-      const response = await fetch('/api/users/update-profile', {
+      const response = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(userData)
       });
 
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-      } else {
-        throw new Error('Failed to update user');
+      if (!response.ok) {
+        throw new Error('Failed to update user profile');
       }
+
+      const updatedUser = await response.json();
+      setUser(prevUser => ({ ...prevUser, ...updatedUser }));
     } catch (error) {
-      console.error('Update user error:', error);
+      console.error('Error updating user profile:', error);
       throw error;
     }
   };
