@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Comment } from '@/types/AITool';
 import Image from 'next/image';
@@ -22,7 +22,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchComments = async (page: number) => {
+  const fetchComments = useCallback(async (page: number) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/tools/${toolId}/comments?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${searchQuery}`);
@@ -39,11 +39,11 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toolId, sortBy, sortOrder, searchQuery]);
 
   useEffect(() => {
     fetchComments(currentPage);
-  }, [toolId, currentPage, sortBy, sortOrder, searchQuery]);
+  }, [fetchComments, currentPage]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
