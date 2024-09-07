@@ -2,17 +2,22 @@ import React, { useState } from 'react';
 
 interface ReplyFormProps {
   commentId: string;
+  initialContent?: string;
   onReply: (commentId: string, content: string) => void;
+  onCancel?: () => void;
+  isEditing?: boolean;
 }
 
-export default function ReplyForm({ commentId, onReply }: ReplyFormProps) {
-  const [content, setContent] = useState('');
+export default function ReplyForm({ commentId, initialContent = '', onReply, onCancel, isEditing = false }: ReplyFormProps) {
+  const [content, setContent] = useState(initialContent);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
       onReply(commentId, content);
-      setContent('');
+      if (!isEditing) {
+        setContent('');
+      }
     }
   };
 
@@ -24,12 +29,23 @@ export default function ReplyForm({ commentId, onReply }: ReplyFormProps) {
         className="w-full p-2 bg-gray-700 text-white rounded"
         placeholder="写下你的回复..."
       />
-      <button
-        type="submit"
-        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        回复
-      </button>
+      <div className="mt-2">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2"
+        >
+          {isEditing ? '保存' : '回复'}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            取消
+          </button>
+        )}
+      </div>
     </form>
   );
 }

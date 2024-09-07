@@ -23,6 +23,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   const { user, token } = useAuth();  // 获取token
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
 
   const fetchComments = useCallback(async (page: number) => {
     setIsLoading(true);
@@ -200,6 +201,68 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     }
   };
 
+  const handleEditReply = async (commentId: string, replyId: string, newContent: string) => {
+    try {
+      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reply/${replyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ content: newContent }),
+      });
+
+      if (response.ok) {
+        const updatedComments = comments.map(comment => 
+          comment._id === commentId
+            ? {
+                ...comment,
+                replies: comment.replies.map(reply =>
+                  reply._id === replyId ? { ...reply, content: newContent } : reply
+                )
+              }
+            : comment
+        );
+        setComments(updatedComments);
+        setEditingReplyId(null);
+        alert('回复已更新');
+      } else {
+        alert('更新回复失败');
+      }
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      alert('更新回复时出错');
+    }
+  };
+
+  const handleDeleteReply = async (commentId: string, replyId: string) => {
+    if (window.confirm('确定要删除这条回复吗?')) {
+      try {
+        const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reply/${replyId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+        });
+
+        if (response.ok) {
+          const updatedComments = comments.map(comment => 
+            comment._id === commentId
+              ? { ...comment, replies: comment.replies.filter(reply => reply._id !== replyId) }
+              : comment
+          );
+          setComments(updatedComments);
+          alert('回复已删除');
+        } else {
+          alert('删除回复失败');
+        }
+      } catch (error) {
+        console.error('Error deleting reply:', error);
+        alert('删除回复时出错');
+      }
+    }
+  };
+
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
@@ -312,6 +375,24 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                         <p className="text-gray-400 text-sm">
                           发表于 {new Date(reply.createdAt).toLocaleString()}
                         </p>
+                        {user && (user.id === reply.userId || user.role === 'admin') && (
+                          <div>
+                            {editingReplyId === reply._id ? (
+                              <ReplyForm
+                                commentId={comment._id}
+                                initialContent={reply.content}
+                                onReply={(commentId, content) => handleEditReply(commentId, reply._id, content)}
+                                onCancel={() => setEditingReplyId(null)}
+                                isEditing={true}
+                              />
+                            ) : (
+                              <>
+                                <button onClick={() => setEditingReplyId(reply._id)}>编辑</button>
+                                <button onClick={() => handleDeleteReply(comment._id, reply._id)}>删除</button>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                     <Suspense fallback={<div>Loading reply form...</div>}>
