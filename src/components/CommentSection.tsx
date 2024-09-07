@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Comment } from '@/types/AITool';
 import Image from 'next/image';
-import EditCommentForm from './EditCommentForm';
-import CommentForm from './CommentForm';
+
+const CommentForm = lazy(() => import('./CommentForm'));
+const EditCommentForm = lazy(() => import('./EditCommentForm'));
 
 interface CommentSectionProps {
   toolId: string;
@@ -170,7 +171,9 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
       {user ? (
-        <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
+        <Suspense fallback={<div>Loading comment form...</div>}>
+          <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
+        </Suspense>
       ) : (
         <p className="text-white mb-4">请登录后发表评论</p>
       )}
@@ -209,12 +212,14 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                 <span className="font-bold text-white">{comment.user.username}</span>
               </div>
               {editingCommentId === comment._id ? (
-                <EditCommentForm
-                  initialContent={comment.content}
-                  initialRating={comment.rating}
-                  onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
-                  onCancel={() => setEditingCommentId(null)}
-                />
+                <Suspense fallback={<div>Loading edit form...</div>}>
+                  <EditCommentForm
+                    initialContent={comment.content}
+                    initialRating={comment.rating}
+                    onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
+                    onCancel={() => setEditingCommentId(null)}
+                  />
+                </Suspense>
               ) : (
                 <>
                   <p className="text-white">{comment.content}</p>

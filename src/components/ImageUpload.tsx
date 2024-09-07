@@ -1,5 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, lazy, Suspense } from 'react';
 import { useToast } from '@/hooks/useToast';
+
+const ImagePreview = lazy(() => import('./ImagePreview'));
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
@@ -9,6 +11,7 @@ interface ImageUploadProps {
 export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
+  const [url, setUrl] = React.useState<string | null>(null);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault(); // 防止可能的表单提交
@@ -29,6 +32,7 @@ export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
       }
 
       const data = await response.json();
+      setUrl(data.url);
       onUpload(data.url);
       showToast('图片上传成功', 'success');
     } catch (error) {
@@ -53,6 +57,11 @@ export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
         accept="image/*"
         className="hidden"
       />
+      {url && (
+        <Suspense fallback={<div>Loading preview...</div>}>
+          <ImagePreview url={url} />
+        </Suspense>
+      )}
     </div>
   );
 }

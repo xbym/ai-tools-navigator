@@ -1,4 +1,4 @@
-import ToolDetailContent from '@/components/ToolDetailContent';
+import { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next'
 import AITool from '@/models/AITool'
 import dbConnect from '@/lib/dbConnect'
@@ -6,7 +6,12 @@ import { notFound } from 'next/navigation'
 import Layout from '@/components/Layout'
 import dynamic from 'next/dynamic'
 
+const ToolDetailContent = dynamic(() => import('@/components/ToolDetailContent'), {
+  loading: () => <p>Loading tool details...</p>,
+})
+
 const CommentSection = dynamic(() => import('@/components/CommentSection'), {
+  loading: () => <p>Loading comments...</p>,
   ssr: false,
 })
 
@@ -49,8 +54,12 @@ export default async function ToolDetail({ params }: Props) {
   return (
     <Layout title={`${tool.name} - AI Tool Details`}>
       <div className="container mx-auto px-4 py-8">
-        <ToolDetailContent id={id} />
-        <CommentSection toolId={id} />
+        <Suspense fallback={<div>Loading tool details...</div>}>
+          <ToolDetailContent id={id} />
+        </Suspense>
+        <Suspense fallback={<div>Loading comments...</div>}>
+          <CommentSection toolId={id} />
+        </Suspense>
       </div>
     </Layout>
   );

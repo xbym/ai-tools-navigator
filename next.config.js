@@ -5,6 +5,10 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
+  swcMinify: true, // 使用 SWC 进行最小化
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production", // 在生产环境中移除 console
+  },
   // 如果你需要其他配置,可以在这里添加
 };
 
