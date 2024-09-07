@@ -12,7 +12,8 @@
     "postbuild": "next-sitemap",
     "generate-sitemap": "next-sitemap",
     "test": "jest --config jest.config.js",
-    "check-comments": "ts-node scripts/checkComments.ts"
+    "check-comments": "ts-node scripts/checkComments.ts",
+    "update-comments": "ts-node scripts/updateCommentsWithReplies.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^8.28.0",

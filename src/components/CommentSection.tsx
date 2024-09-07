@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Comment } from '@/types/AITool';
+import { Comment, Reply } from '@/types/AITool';
 import Image from 'next/image';
 
 const CommentForm = lazy(() => import('./CommentForm'));
 const EditCommentForm = lazy(() => import('./EditCommentForm'));
+const ReplyForm = lazy(() => import('./ReplyForm'));
 
 interface CommentSectionProps {
   toolId: string;
@@ -167,6 +168,38 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     }
   };
 
+  const handleReply = async (commentId: string, content: string) => {
+    if (!user || !token) {
+      alert('请先登录后再回复');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reply`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (response.ok) {
+        const newReply = await response.json();
+        setComments(comments.map(comment => 
+          comment._id === commentId 
+            ? { ...comment, replies: [...(comment.replies || []), newReply] }
+            : comment
+        ));
+      } else {
+        alert('回复失败,请稍后再试');
+      }
+    } catch (error) {
+      console.error('Error replying to comment:', error);
+      alert('回复时发生错误,请稍后再试');
+    }
+  };
+
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
@@ -260,6 +293,30 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                         举报
                       </button>
                     )}
+                  </div>
+                  <div className="mt-4">
+                    <h4 className="text-white font-bold">回复:</h4>
+                    {comment.replies && comment.replies.map((reply: Reply) => (
+                      <div key={reply._id} className="ml-4 mt-2 p-2 bg-gray-600 rounded">
+                        <div className="flex items-center mb-1">
+                          <Image
+                            src={reply.avatarUrl || '/default-avatar.png'}
+                            alt={reply.username}
+                            width={20}
+                            height={20}
+                            className="rounded-full mr-2"
+                          />
+                          <span className="text-white font-bold">{reply.username}</span>
+                        </div>
+                        <p className="text-white">{reply.content}</p>
+                        <p className="text-gray-400 text-sm">
+                          发表于 {new Date(reply.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                    <Suspense fallback={<div>Loading reply form...</div>}>
+                      <ReplyForm commentId={comment._id} onReply={handleReply} />
+                    </Suspense>
                   </div>
                 </>
               )}

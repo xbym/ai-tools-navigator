@@ -29,9 +29,19 @@ export interface Comment {
   userReaction?: 'like' | 'dislike' | null;
   reports?: string[];  // 添加这行
   toolId?: string;     // 添加这行
+  replies: Reply[];
 }
 
 export interface Rating {
   userId: string;
   score: number;
+}
+
+export interface Reply {
+  _id: string;
+  userId: string;
+  username: string;
+  avatarUrl?: string;
+  content: string;
+  createdAt: string;
 }

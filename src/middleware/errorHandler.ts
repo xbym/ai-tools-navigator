@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/utils/logger';
 
-export function errorHandler(error: unknown, req: NextRequest) {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  logger.error('API Error', {
-    message: errorMessage,
-    url: req.url,
-    method: req.method,
-  });
-
-  return NextResponse.json(
-    { error: 'Internal Server Error', message: errorMessage },
-    { status: 500 }
-  );
+export function errorHandler(error: unknown, request: NextRequest) {
+  console.error('API Error', error);
+  
+  if (error instanceof Error) {
+    console.error('Error details:', error.message, error.stack);
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+  
+  return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
 }
