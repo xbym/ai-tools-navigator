@@ -6,6 +6,7 @@ import { errorHandler } from '@/middleware/errorHandler';
 import mongoose from 'mongoose';  // 添加这行
 import { logger } from '@/utils/logger';  // 添加这行
 import jwt from 'jsonwebtoken';  // 添加这行
+import { Comment, Reply } from '@/types/AITool'; // 导入类型
 
 // 添加这个类型声明
 declare module 'jsonwebtoken' {
@@ -15,18 +16,22 @@ declare module 'jsonwebtoken' {
 }
 
 // 定义评论的接口
-interface IComment {
-  _id: string;
-  userId: string | { _id: string; username: string };
-  content: string;
-  rating: number;
-  createdAt: Date;
+interface IComment extends Omit<Comment, 'user' | 'replies'> {
+  user: mongoose.Types.ObjectId | { _id: string; username: string; avatarUrl: string };
+  replies: IReply[];
+  toObject(): any;
 }
 
 // 定义用户文档的接口
 interface IUser {
   _id: mongoose.Types.ObjectId;  // 修改这行
   username: string;
+}
+
+// 定义回复的接口
+interface IReply extends Omit<Reply, 'userId'> {
+  userId: mongoose.Types.ObjectId | { _id: string; username: string; avatarUrl: string };
+  toObject(): any;
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -64,103 +69,45 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 }
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    await dbConnect();
-    const toolId = params.id;
-    const page = parseInt(request.nextUrl.searchParams.get('page') || '1');
-    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '10');
-    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'createdAt';
-    const sortOrder = request.nextUrl.searchParams.get('sortOrder') || 'desc';
-    const searchQuery = request.nextUrl.searchParams.get('search') || '';
-
-    const skip = (page - 1) * limit;
-
-    const tool = await AITool.findById(toolId);
-    if (!tool) {
-      return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
-    }
-
-    const sortOptions: { [key: string]: 1 | -1 } = {};
-    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
-
-    const searchFilter = searchQuery
-      ? { $match: { 'comments.content': { $regex: searchQuery, $options: 'i' } } }
-      : { $match: {} };
-
-    const comments = await AITool.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(toolId) } },
-      { $unwind: '$comments' },
-      searchFilter,
-      { $sort: sortOptions },
-      { $skip: skip },
-      { $limit: limit },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'comments.userId',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $project: {
-          _id: '$comments._id',
-          content: '$comments.content',
-          rating: '$comments.rating',
-          createdAt: '$comments.createdAt',
-          likes: '$comments.likes',
-          dislikes: '$comments.dislikes',
-          userReactions: '$comments.userReactions',
-          user: { $arrayElemAt: ['$user', 0] }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          comments: { $push: '$$ROOT' },
-          total: { $sum: 1 }
-        }
+  await dbConnect();
+  const toolId = params.id;
+  const tool = await AITool.findById(toolId).populate({
+    path: 'comments',
+    populate: [
+      { path: 'userId', select: 'username avatarUrl' },
+      { 
+        path: 'replies',
+        populate: { path: 'userId', select: 'username avatarUrl' }
       }
-    ]);
+    ]
+  });
 
-    const result = comments[0] || { comments: [], total: 0 };
-
-    // 尝试从请求中获取用户ID,如果没有则为null
-    let userId = null;
-    try {
-      const authHeader = request.headers.get('authorization');
-      if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
-        userId = decoded.userId;
-      }
-    } catch (error) {
-      logger.warn('Failed to decode token:', error);
-    }
-
-    return NextResponse.json({
-      comments: result.comments.map((comment: any) => ({
-        ...comment,
-        user: comment.user ? {
-          id: comment.user._id.toString(),
-          username: comment.user.username || '匿名用户',
-          avatarUrl: comment.user.avatarUrl || '/default-avatar.png'
-        } : {
-          id: null,
-          username: '匿名用户',
-          avatarUrl: '/default-avatar.png'
-        },
-        likes: comment.likes || 0,
-        dislikes: comment.dislikes || 0,
-        userReaction: userId ? comment.userReactions?.find((r: any) => r.userId.toString() === userId)?.reaction || null : null
-      })),
-      currentPage: page,
-      totalPages: Math.ceil(result.total / limit),
-      totalComments: result.total
-    });
-  } catch (error) {
-    return errorHandler(error, request);
+  if (!tool) {
+    return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
   }
+
+  const comments = tool.comments.map((comment: any) => {
+    const commentObj = comment.toObject();
+    return {
+      ...commentObj,
+      user: {
+        id: commentObj.userId?._id || commentObj.userId,
+        username: commentObj.userId?.username || 'Anonymous',
+        avatarUrl: commentObj.userId?.avatarUrl || '/default-avatar.png'
+      },
+      replies: (commentObj.replies || []).map((reply: any) => {
+        const replyObj = reply.toObject ? reply.toObject() : reply;
+        return {
+          ...replyObj,
+          userId: replyObj.userId?._id || replyObj.userId,
+          username: replyObj.userId?.username || 'Anonymous',
+          avatarUrl: replyObj.userId?.avatarUrl || '/default-avatar.png'
+        };
+      })
+    };
+  });
+
+  return NextResponse.json({ comments });
 }
 
 // 添加新的路由处理函数

@@ -27,9 +27,9 @@ export interface Comment {
   likes: number;
   dislikes: number;
   userReaction?: 'like' | 'dislike' | null;
-  reports?: string[];  // 添加这行
-  toolId?: string;     // 添加这行
-  replies: Reply[];
+  reports?: string[];
+  toolId?: string;
+  replies: Reply[]; // 确保这里是一个数组
 }
 
 export interface Rating {

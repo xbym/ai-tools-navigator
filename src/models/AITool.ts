@@ -22,22 +22,19 @@ interface IComment extends Document {
 }
 
 const ReplySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true, default: 'Anonymous' },  // 添加默认值
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  avatarUrl: String
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  content: String,
+  createdAt: { type: Date, default: Date.now }
 });
 
 const CommentSchema = new mongoose.Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String, required: true },
-  rating: { type: Number, required: true, min: 1, max: 5 },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  content: String,
+  rating: Number,
   createdAt: { type: Date, default: Date.now },
   likes: { type: Number, default: 0 },
   dislikes: { type: Number, default: 0 },
-  reports: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  replies: [ReplySchema],
+  replies: [ReplySchema]
 });
 
 interface IComment {

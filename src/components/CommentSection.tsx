@@ -33,12 +33,18 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
         throw new Error('Failed to fetch comments');
       }
       const data = await response.json();
-      setComments(data.comments);
-      setCurrentPage(data.currentPage);
-      setTotalPages(data.totalPages);
+      console.log('API response:', JSON.stringify(data, null, 2));
+      if (Array.isArray(data.comments)) {
+        setComments(data.comments);
+      } else {
+        console.error('Unexpected comments data structure:', data);
+        setComments([]);
+      }
+      setCurrentPage(data.currentPage || 1);
+      setTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error('Error fetching comments:', error);
-      // 可以在这里添加一些用户友好的错误提示
+      setComments([]);
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +52,25 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
 
   useEffect(() => {
     fetchComments(currentPage);
+
+    // 设置定期刷新
+    const intervalId = setInterval(() => {
+      fetchComments(currentPage);
+    }, 30000); // 每30秒刷新一次
+
+    // 添加页面可见性变化监听
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchComments(currentPage);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 清理函数
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [fetchComments, currentPage]);
 
   const handlePageChange = (newPage: number) => {
@@ -192,6 +217,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
             ? { ...comment, replies: [...(comment.replies || []), newReply] }
             : comment
         ));
+        alert('回复已成功添加');
       } else {
         alert('回复失败,请稍后再试');
       }
@@ -217,9 +243,9 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
           comment._id === commentId
             ? {
                 ...comment,
-                replies: comment.replies.map(reply =>
+                replies: comment.replies?.map(reply =>
                   reply._id === replyId ? { ...reply, content: newContent } : reply
-                )
+                ) ?? []
               }
             : comment
         );
@@ -248,7 +274,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
         if (response.ok) {
           const updatedComments = comments.map(comment => 
             comment._id === commentId
-              ? { ...comment, replies: comment.replies.filter(reply => reply._id !== replyId) }
+              ? { ...comment, replies: comment.replies?.filter(reply => reply._id !== replyId) ?? [] }
               : comment
           );
           setComments(updatedComments);
@@ -262,6 +288,10 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
       }
     }
   };
+
+  useEffect(() => {
+    console.log('Current comments:', comments);
+  }, [comments]);
 
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
@@ -293,116 +323,123 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
       </div>
       {isLoading ? (
         <p className="text-white">加载中...</p>
-      ) : comments.length > 0 ? (
+      ) : comments && comments.length > 0 ? (
         <>
-          {comments.map((comment) => (
-            <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg">
-              <div className="flex items-center mb-2">
-                <Image
-                  src={comment.user.avatarUrl}
-                  alt={comment.user.username}
-                  width={40}
-                  height={40}
-                  className="rounded-full mr-2"
-                />
-                <span className="font-bold text-white">{comment.user.username}</span>
-              </div>
-              {editingCommentId === comment._id ? (
-                <Suspense fallback={<div>Loading edit form...</div>}>
-                  <EditCommentForm
-                    initialContent={comment.content}
-                    initialRating={comment.rating}
-                    onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
-                    onCancel={() => setEditingCommentId(null)}
+          {comments.map((comment) => {
+            console.log('Rendering comment:', comment);
+            return (
+              <div key={comment._id} className="mb-4 p-4 bg-gray-700 rounded-lg">
+                <div className="flex items-center mb-2">
+                  <Image
+                    src={comment.user?.avatarUrl || '/default-avatar.png'}
+                    alt={comment.user?.username || 'Anonymous'}
+                    width={40}
+                    height={40}
+                    className="rounded-full mr-2"
                   />
-                </Suspense>
-              ) : (
-                <>
-                  <p className="text-white">{comment.content}</p>
-                  <p className="text-yellow-400">评分: {comment.rating}</p>
-                  <div className="mt-2 flex items-center">
-                    <button 
-                      onClick={() => handleReaction(comment._id, 'like')}
-                      className={`mr-2 ${comment.userReaction === 'like' ? 'text-blue-500' : 'text-gray-400'}`}
-                    >
-                      👍 {comment.likes}
-                    </button>
-                    <button 
-                      onClick={() => handleReaction(comment._id, 'dislike')}
-                      className={`mr-2 ${comment.userReaction === 'dislike' ? 'text-red-500' : 'text-gray-400'}`}
-                    >
-                      👎 {comment.dislikes}
-                    </button>
-                  </div>
-                  {user && user.id === comment.user.id && (
-                    <div className="mt-2">
-                      <button onClick={() => setEditingCommentId(comment._id)} className="text-blue-400 mr-2">
-                        编辑
-                      </button>
-                      <button onClick={() => handleDeleteComment(comment._id)} className="text-red-400">
-                        删除
-                      </button>
-                    </div>
-                  )}
-                  <div className="mt-2 flex items-center justify-between">
-                    <div>
-                      {/* ... 点赞/踩按钮保持不变 */}
-                    </div>
-                    {user && user.id !== comment.user.id && (
+                  <span className="font-bold text-white">{comment.user?.username || 'Anonymous'}</span>
+                </div>
+                {editingCommentId === comment._id ? (
+                  <Suspense fallback={<div>Loading edit form...</div>}>
+                    <EditCommentForm
+                      initialContent={comment.content}
+                      initialRating={comment.rating}
+                      onSave={(newContent, newRating) => handleEditComment(comment._id, newContent, newRating)}
+                      onCancel={() => setEditingCommentId(null)}
+                    />
+                  </Suspense>
+                ) : (
+                  <>
+                    <p className="text-white">{comment.content}</p>
+                    <p className="text-yellow-400">评分: {comment.rating}</p>
+                    <div className="mt-2 flex items-center">
                       <button 
-                        onClick={() => handleReport(comment._id)}
-                        className="text-yellow-500 hover:text-yellow-600"
+                        onClick={() => handleReaction(comment._id, 'like')}
+                        className={`mr-2 ${comment.userReaction === 'like' ? 'text-blue-500' : 'text-gray-400'}`}
                       >
-                        举报
+                        👍 {comment.likes}
                       </button>
+                      <button 
+                        onClick={() => handleReaction(comment._id, 'dislike')}
+                        className={`mr-2 ${comment.userReaction === 'dislike' ? 'text-red-500' : 'text-gray-400'}`}
+                      >
+                        👎 {comment.dislikes}
+                      </button>
+                    </div>
+                    {user && user.id === comment.user.id && (
+                      <div className="mt-2">
+                        <button onClick={() => setEditingCommentId(comment._id)} className="text-blue-400 mr-2">
+                          编辑
+                        </button>
+                        <button onClick={() => handleDeleteComment(comment._id)} className="text-red-400">
+                          删除
+                        </button>
+                      </div>
                     )}
-                  </div>
-                  <div className="mt-4">
-                    <h4 className="text-white font-bold">回复:</h4>
-                    {comment.replies && comment.replies.map((reply: Reply) => (
-                      <div key={reply._id} className="ml-4 mt-2 p-2 bg-gray-600 rounded">
-                        <div className="flex items-center mb-1">
-                          <Image
-                            src={reply.avatarUrl || '/default-avatar.png'}
-                            alt={reply.username || 'Anonymous'}
-                            width={20}
-                            height={20}
-                            className="rounded-full mr-2"
-                          />
-                          <span className="text-white font-bold">{reply.username || 'Anonymous'}</span>
-                        </div>
-                        <p className="text-white">{reply.content}</p>
-                        <p className="text-gray-400 text-sm">
-                          发表于 {new Date(reply.createdAt).toLocaleString()}
-                        </p>
-                        {user && (user.id === reply.userId || user.role === 'admin') && (
-                          <div>
-                            {editingReplyId === reply._id ? (
-                              <ReplyForm
-                                commentId={comment._id}
-                                initialContent={reply.content}
-                                onReply={(commentId, content) => handleEditReply(commentId, reply._id, content)}
-                                onCancel={() => setEditingReplyId(null)}
-                                isEditing={true}
+                    <div className="mt-2 flex items-center justify-between">
+                      <div>
+                        {/* ... 点赞/踩按钮保持不变 */}
+                      </div>
+                      {user && user.id !== comment.user.id && (
+                        <button 
+                          onClick={() => handleReport(comment._id)}
+                          className="text-yellow-500 hover:text-yellow-600"
+                        >
+                          举报
+                        </button>
+                      )}
+                    </div>
+                    <div className="mt-4">
+                      <h4 className="text-white font-bold">回复:</h4>
+                      {comment.replies && comment.replies.length > 0 ? (
+                        comment.replies.map((reply: Reply) => (
+                          <div key={reply._id} className="ml-4 mt-2 p-2 bg-gray-600 rounded">
+                            <div className="flex items-center mb-1">
+                              <Image
+                                src={reply.avatarUrl || '/default-avatar.png'}
+                                alt={reply.username || 'Anonymous'}
+                                width={20}
+                                height={20}
+                                className="rounded-full mr-2"
                               />
-                            ) : (
-                              <>
-                                <button onClick={() => setEditingReplyId(reply._id)}>编辑</button>
-                                <button onClick={() => handleDeleteReply(comment._id, reply._id)}>删除</button>
-                              </>
+                              <span className="text-white font-bold">{reply.username || 'Anonymous'}</span>
+                            </div>
+                            <p className="text-white">{reply.content}</p>
+                            <p className="text-gray-400 text-sm">
+                              发表于 {new Date(reply.createdAt).toLocaleString()}
+                            </p>
+                            {user && (user.id === reply.userId || user.role === 'admin') && (
+                              <div>
+                                {editingReplyId === reply._id ? (
+                                  <ReplyForm
+                                    commentId={comment._id}
+                                    initialContent={reply.content}
+                                    onReply={(commentId, content) => handleEditReply(commentId, reply._id, content)}
+                                    onCancel={() => setEditingReplyId(null)}
+                                    isEditing={true}
+                                  />
+                                ) : (
+                                  <>
+                                    <button onClick={() => setEditingReplyId(reply._id)}>编辑</button>
+                                    <button onClick={() => handleDeleteReply(comment._id, reply._id)}>删除</button>
+                                  </>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                    <Suspense fallback={<div>Loading reply form...</div>}>
-                      <ReplyForm commentId={comment._id} onReply={handleReply} />
-                    </Suspense>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+                        ))
+                      ) : (
+                        <p className="text-gray-400">暂无回复</p>
+                      )}
+                      <Suspense fallback={<div>Loading reply form...</div>}>
+                        <ReplyForm commentId={comment._id} onReply={handleReply} />
+                      </Suspense>
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
           <div className="flex justify-center mt-4">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
