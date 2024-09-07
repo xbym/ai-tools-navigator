@@ -7,7 +7,7 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ['res.cloudinary.com'], // 确保这里包含了你的Cloudinary域名
+    domains: ['res.cloudinary.com'], // 添加这一行
   },
 };
 

@@ -11,6 +11,7 @@ export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
   const { showToast } = useToast();
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault(); // 防止可能的表单提交
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -39,6 +40,7 @@ export default function ImageUpload({ onUpload, label }: ImageUploadProps) {
   return (
     <div>
       <button
+        type="button" // 确保这是一个按钮类型，而不是提交类型
         onClick={() => fileInputRef.current?.click()}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >

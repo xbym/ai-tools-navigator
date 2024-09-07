@@ -2,11 +2,13 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 你的其他 Next.js 配置
+  // ... other configs
+  experimental: {
+    appDir: true,
+  },
+  images: {
+    domains: ['res.cloudinary.com'],
+  },
 };
 
-module.exports = withSentryConfig(
-  nextConfig,
-  { silent: true },
-  { hideSourcemaps: true },
-);
+module.exports = nextConfig;

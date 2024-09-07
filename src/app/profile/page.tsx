@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import EditProfileForm from '@/components/EditProfileForm';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, updateUser } = useAuth();
@@ -50,6 +51,15 @@ export default function ProfilePage() {
           />
         ) : (
           <div className="space-y-4">
+            {user.avatarUrl && (
+              <Image
+                src={user.avatarUrl}
+                alt="User Avatar"
+                width={100}
+                height={100}
+                className="rounded-full"
+              />
+            )}
             <p className="text-gray-300">用户名: {user.username}</p>
             <p className="text-gray-300">邮箱: {user.email}</p>
             <button

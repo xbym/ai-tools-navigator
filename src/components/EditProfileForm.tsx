@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import ImageUpload from './ImageUpload';
+import Image from 'next/image';
 
 interface EditProfileFormProps {
   onCancel: () => void;
@@ -12,18 +14,23 @@ export default function EditProfileForm({ onCancel, onSuccess }: EditProfileForm
   const { user, updateUser } = useAuth();
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await updateUser({ username, email });
+      await updateUser({ username, email, avatarUrl });
       onSuccess();
     } catch (error) {
       console.error('更新个人资料失败:', error);
       setError('更新个人资料失败，请重试。');
     }
+  };
+
+  const handleAvatarUpload = (url: string) => {
+    setAvatarUrl(url);
   };
 
   return (
@@ -48,6 +55,20 @@ export default function EditProfileForm({ onCancel, onSuccess }: EditProfileForm
           className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
         />
       </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-300">头像</label>
+        <ImageUpload onUpload={handleAvatarUpload} label="上传头像" />
+        {avatarUrl && (
+          <Image
+            src={avatarUrl}
+            alt="User Avatar"
+            width={100}
+            height={100}
+            className="mt-2 rounded-full"
+          />
+        )}
+      </div>
+      {error && <p className="text-red-500">{error}</p>}
       <div className="flex justify-end space-x-4">
         <button
           type="button"

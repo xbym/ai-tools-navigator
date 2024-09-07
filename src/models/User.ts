@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },  // 确保这个字段存在
-  avatarUrl: { type: String, default: '/default-avatar.png' },
+  avatarUrl: { type: String, default: '' },
   resetToken: String,
   resetTokenExpiry: Date,
   lastPasswordReset: Date,
