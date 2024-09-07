@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
+import Notification from '@/models/Notification';
 import { authMiddleware } from '@/middleware/authMiddleware';
-import { errorHandler } from '@/middleware/errorHandler';
-import mongoose from 'mongoose';
 
 export async function POST(
   request: NextRequest,
@@ -24,22 +23,25 @@ export async function POST(
         return NextResponse.json({ message: 'Comment not found' }, { status: 404 });
       }
 
-      // 检查是否已经举报过
-      if (comment.reports && comment.reports.includes(userId)) {
+      if (comment.reports.includes(userId)) {
         return NextResponse.json({ message: 'You have already reported this comment' }, { status: 400 });
       }
 
-      // 添加举报
-      if (!comment.reports) {
-        comment.reports = [];
-      }
       comment.reports.push(userId);
-
       await tool.save();
+
+      // 创建通知
+      await Notification.create({
+        type: 'comment_report',
+        toolId,
+        commentId,
+        reporterId: userId
+      });
 
       return NextResponse.json({ message: 'Comment reported successfully' });
     } catch (error) {
-      return errorHandler(error, request);
+      console.error('Error reporting comment:', error);
+      return NextResponse.json({ message: 'Error reporting comment' }, { status: 500 });
     }
   });
 }

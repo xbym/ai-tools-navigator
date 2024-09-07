@@ -4,7 +4,7 @@ export interface AITool {
   description: string;
   category: string;
   url: string;
-  tags: string[];
+  tags?: string[];  // 确保这是可选的
   iconUrl: string;
   screenshotUrl?: string;
   comments: Comment[];

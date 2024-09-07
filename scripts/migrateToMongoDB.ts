@@ -22,7 +22,10 @@ async function migrateData() {
 
   try {
     await AITool.deleteMany({});
-    await AITool.insertMany(tools);
+    await AITool.insertMany(tools.map((tool: any) => ({
+      ...tool,
+      tags: tool.tags || [],  // 确保每个工具都有 tags 字段
+    })));
     console.log('Data migrated successfully');
   } catch (error) {
     console.error('Error migrating data:', error);

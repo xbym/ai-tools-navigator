@@ -75,11 +75,15 @@ export default function ToolDetailContent({ id }: ToolDetailContentProps) {
         <div className="mb-4">
           <h2 className="text-xl font-semibold mb-2">Tags</h2>
           <div className="flex flex-wrap gap-2">
-            {tool.tags.map((tag) => (
-              <span key={tag} className="bg-gray-200 text-gray-800 px-2 py-1 rounded">
-                {tag}
-              </span>
-            ))}
+            {tool.tags && tool.tags.length > 0 ? (
+              tool.tags.map((tag) => (
+                <span key={tag} className="bg-gray-200 text-gray-800 px-2 py-1 rounded">
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className="text-gray-500">No tags available</span>
+            )}
           </div>
         </div>
         <a

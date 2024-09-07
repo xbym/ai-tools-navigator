@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminRoute from '@/components/AdminRoute';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,16 +13,9 @@ export default function AdminPage() {
   const [reportedComments, setReportedComments] = useState([]);
   const { user, token } = useAuth();
   const router = useRouter();
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  useEffect(() => {
-    if (user && user.role === 'admin') {
-      fetchUsers();
-      fetchTools();
-      fetchReportedComments();
-    }
-  }, [user]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -34,9 +27,9 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
-  };
+  }, [token]);
 
-  const fetchTools = async () => {
+  const fetchTools = useCallback(async () => {
     try {
       const response = await fetch('/api/tools');
       if (response.ok) {
@@ -46,9 +39,9 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error fetching tools:', error);
     }
-  };
+  }, []);
 
-  const fetchReportedComments = async () => {
+  const fetchReportedComments = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/reported-comments', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -60,7 +53,30 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error fetching reported comments:', error);
     }
-  };
+  }, [token]);
+
+  const fetchNotificationCount = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/notifications', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setNotificationCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching notification count:', error);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      fetchUsers();
+      fetchTools();
+      fetchReportedComments();
+      fetchNotificationCount();
+    }
+  }, [user, fetchUsers, fetchTools, fetchReportedComments, fetchNotificationCount]);
 
   return (
     <AdminRoute>
@@ -87,6 +103,13 @@ export default function AdminPage() {
               <p>被举报评论: {reportedComments.length}</p>
               <Link href="/admin/reported-comments" className="text-blue-400 hover:underline">
                 处理被举报评论
+              </Link>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h2 className="text-xl font-semibold mb-4">通知</h2>
+              <p>未读通知: {notificationCount}</p>
+              <Link href="/admin/notifications" className="text-blue-400 hover:underline">
+                查看通知
               </Link>
             </div>
           </div>

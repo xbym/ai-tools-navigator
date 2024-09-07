@@ -30,7 +30,7 @@ export default function AIToolList({ tools }: AIToolListProps) {
               <span className="bg-gray-700 text-gray-300 text-xs font-semibold px-2 py-1 rounded">
                 {tool.category}
               </span>
-              {tool.tags.slice(0, 2).map((tag) => (
+              {tool.tags && Array.isArray(tool.tags) && tool.tags.slice(0, 2).map((tag) => (
                 <span key={tag} className="bg-blue-900 text-blue-200 text-xs font-semibold px-2 py-1 rounded">
                   {tag}
                 </span>

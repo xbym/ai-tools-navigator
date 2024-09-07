@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminRoute from '@/components/AdminRoute';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,11 +18,7 @@ export default function AdminToolsPage() {
   const [tools, setTools] = useState<AITool[]>([]);
   const { token } = useAuth();
 
-  useEffect(() => {
-    fetchTools();
-  }, []);
-
-  const fetchTools = async () => {
+  const fetchTools = useCallback(async () => {
     try {
       const response = await fetch('/api/tools', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -34,7 +30,11 @@ export default function AdminToolsPage() {
     } catch (error) {
       console.error('Error fetching tools:', error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchTools();
+  }, [fetchTools]);
 
   return (
     <AdminRoute>

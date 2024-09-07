@@ -54,7 +54,7 @@ const AIToolSchema = new mongoose.Schema({
   ratings: [{ userId: String, score: Number }],
   averageRating: { type: Number, default: 0 },
   comments: [CommentSchema],
-  tags: [String],
+  tags: { type: [String], default: [] },  // 确保这个字段存在
   viewCount: { type: Number, default: 0 }
 });
 

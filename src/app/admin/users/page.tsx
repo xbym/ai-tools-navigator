@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminRoute from '@/components/AdminRoute';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,11 +9,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const { token } = useAuth();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -25,7 +21,11 @@ export default function AdminUsersPage() {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   return (
     <AdminRoute>

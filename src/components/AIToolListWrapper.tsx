@@ -40,7 +40,7 @@ export default function AIToolListWrapper() {
       const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             tool.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
-      const matchesTag = selectedTag ? tool.tags.includes(selectedTag) : true;
+      const matchesTag = selectedTag ? tool.tags?.includes(selectedTag) ?? false : true;
       return matchesSearch && matchesCategory && matchesTag;
     });
     setFilteredTools(filtered);

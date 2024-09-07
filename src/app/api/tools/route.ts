@@ -8,7 +8,7 @@ import AITool from '@/models/AITool';
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
-    const tools = await AITool.find({}).select('name category averageRating viewCount');
+    const tools = await AITool.find({}).select('name description category url tags iconUrl averageRating viewCount');
     return NextResponse.json({ tools });
   } catch (error) {
     console.error('Error fetching tools:', error);
