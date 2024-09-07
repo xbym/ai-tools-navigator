@@ -21,15 +21,15 @@ interface IComment extends Document {
   replies: IReply[];
 }
 
-const ReplySchema: Schema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true },
-  avatarUrl: { type: String },
+const ReplySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  username: { type: String, required: true, default: 'Anonymous' },  // 添加默认值
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  avatarUrl: String
 });
 
-const CommentSchema: Schema = new Schema({
+const CommentSchema = new mongoose.Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, required: true },
   rating: { type: Number, required: true, min: 1, max: 5 },
@@ -37,10 +37,7 @@ const CommentSchema: Schema = new Schema({
   likes: { type: Number, default: 0 },
   dislikes: { type: Number, default: 0 },
   reports: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  replies: {
-    type: [ReplySchema],
-    default: [],  // 添加这行，确保新评论默认有一个空的 replies 数组
-  },
+  replies: [ReplySchema],
 });
 
 interface IComment {

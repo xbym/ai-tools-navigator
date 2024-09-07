@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/middleware/authMiddleware';
-import { errorHandler } from '@/middleware/errorHandler';
+import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
-import User from '@/models/User';
+import User from '@/models/User';  // 添加这行
 
 export async function POST(
   request: NextRequest,
@@ -10,6 +10,7 @@ export async function POST(
 ) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
+      await dbConnect();
       const { id: toolId, commentId } = params;
       const { content } = await req.json();
 
@@ -28,16 +29,11 @@ export async function POST(
         return NextResponse.json({ message: 'User not found' }, { status: 404 });
       }
 
-      if (!comment.replies) {
-        comment.replies = [];
-      }
-
       const newReply = {
-        userId: user._id,
-        username: user.username,
-        avatarUrl: user.avatarUrl || '',
+        userId,
+        username: user.username || 'Anonymous',  // 确保始终有 username
         content,
-        createdAt: new Date()
+        avatarUrl: user.avatarUrl
       };
 
       comment.replies.push(newReply);
@@ -45,8 +41,8 @@ export async function POST(
 
       return NextResponse.json(newReply);
     } catch (error) {
-      console.error('Error in reply API:', error);
-      return errorHandler(error, request);
+      console.error('Error adding reply:', error);
+      return NextResponse.json({ message: 'Error adding reply' }, { status: 500 });
     }
   });
 }

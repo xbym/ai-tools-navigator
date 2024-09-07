@@ -364,12 +364,12 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
                         <div className="flex items-center mb-1">
                           <Image
                             src={reply.avatarUrl || '/default-avatar.png'}
-                            alt={reply.username}
+                            alt={reply.username || 'Anonymous'}
                             width={20}
                             height={20}
                             className="rounded-full mr-2"
                           />
-                          <span className="text-white font-bold">{reply.username}</span>
+                          <span className="text-white font-bold">{reply.username || 'Anonymous'}</span>
                         </div>
                         <p className="text-white">{reply.content}</p>
                         <p className="text-gray-400 text-sm">
