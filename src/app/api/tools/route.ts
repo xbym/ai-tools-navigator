@@ -7,27 +7,25 @@ import AITool from '@/models/AITool';
 
 export async function GET(request: NextRequest) {
   try {
-    logger.info('Fetching tools');
     await dbConnect();
-    const tools = await AITool.find({});
-    logger.info('Tools fetched successfully');
+    const tools = await AITool.find({}).select('name category averageRating viewCount');
     return NextResponse.json({ tools });
   } catch (error) {
-    return errorHandler(error, request);
+    console.error('Error fetching tools:', error);
+    return NextResponse.json({ message: 'Error fetching tools' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   return authMiddleware(request, async (req: NextRequest, userId: string) => {
     try {
-      logger.info('Creating new AI tool');
       await dbConnect();
       const data = await req.json();
       const tool = await AITool.create({ ...data, createdBy: userId });
-      logger.info('AI tool created successfully', { toolId: tool._id, userId });
       return NextResponse.json(tool, { status: 201 });
     } catch (error) {
-      return errorHandler(error, request);
+      console.error('Error creating tool:', error);
+      return NextResponse.json({ message: 'Error creating tool' }, { status: 500 });
     }
   });
 }
