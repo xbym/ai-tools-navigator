@@ -28,7 +28,6 @@ export default function CommentForm({ toolId, onCommentAdded }: CommentFormProps
     }
     setIsSubmitting(true);
     try {
-      console.log('Submitting comment:', { content, rating, userId: user.id });
       const response = await fetch(`/api/tools/${toolId}/comments`, {
         method: 'POST',
         headers: {
@@ -37,18 +36,9 @@ export default function CommentForm({ toolId, onCommentAdded }: CommentFormProps
         },
         body: JSON.stringify({ content, rating }),
       });
-      if (response.ok) {
-        setContent('');
-        setRating(0);
-        onCommentAdded();
-      } else {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error(errorData.message || 'Failed to submit comment');
-      }
+      // ... 处理响应 ...
     } catch (error) {
-      console.error('Error submitting comment:', error);
-      alert(error instanceof Error ? error.message : '提交评论失败,请稍后再试');
+      // ... 错误处理 ...
     } finally {
       setIsSubmitting(false);
     }
