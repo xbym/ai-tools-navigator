@@ -1,39 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authMiddleware } from '@/middleware/authMiddleware';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
-import { authMiddleware } from '@/middleware/authMiddleware';
 import { logger } from '@/utils/logger';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+export async function POST(request: NextRequest) {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       await dbConnect();
-      const { id } = params;
-      const { content, rating } = await req.json();
+      const { toolId, content, rating } = await req.json();
+      // @ts-ignore
+      const userId = req.user.userId;
 
-      const tool = await AITool.findOneAndUpdate(
-        { _id: id },
-        { $push: { comments: { user: userId, content, rating, createdAt: new Date() }, ratings: rating } },
-        { new: true, runValidators: true }
-      );
-
+      const tool = await AITool.findById(toolId);
       if (!tool) {
         return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
       }
 
-      tool.updateAverageRating();
+      tool.comments.push({
+        user: userId,
+        content,
+        rating,
+        createdAt: new Date(),
+        likes: 0,
+        dislikes: 0,
+        userReactions: new Map(),
+        reports: []
+      });
+
       await tool.save();
 
-      logger.info(`New comment added to tool ${id}`);
+      logger.info(`New comment added to tool ${toolId}`);
       return NextResponse.json({ message: 'Comment added successfully' });
     } catch (error) {
-      logger.error('Error in POST /api/tools/[id]/comments:', error);
+      logger.error('Error adding comment:', error);
       return NextResponse.json({ message: 'Error adding comment' }, { status: 500 });
     }
-  });
+  })(request);
 }
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -93,11 +96,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       await dbConnect();
       const { commentId } = await req.json();
       const tool = await AITool.findById(params.id);
+      // @ts-ignore
+      const userId = req.user.userId;
 
       if (!tool) {
         return NextResponse.json({ message: 'AI工具不存在' }, { status: 404 });
@@ -108,7 +113,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         return NextResponse.json({ message: '评论不存在' }, { status: 404 });
       }
 
-      if (comment.userId.toString() !== userId) {
+      if (comment.user.toString() !== userId) {
         return NextResponse.json({ message: '无权删除此评论' }, { status: 403 });
       }
 
@@ -120,5 +125,5 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       logger.error('Error in DELETE /api/tools/[id]/comments:', error);
       return NextResponse.json({ message: 'Error deleting comment' }, { status: 500 });
     }
-  });
+  })(request);
 }

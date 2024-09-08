@@ -15,20 +15,18 @@ export interface AITool {
 
 export interface Comment {
   _id: string;
+  content: string;
   user: {
     id: string;
     username: string;
     avatarUrl: string;
   };
-  content: string;
   rating: number;
   createdAt: string;
-  replies: Reply[];
   likes: number;
   dislikes: number;
   userReaction?: 'like' | 'dislike' | null;
-  userReactions?: { [userId: string]: 'like' | 'dislike' };
-  reports: Report[]; // 新增字段
+  replies: Reply[];
 }
 
 export interface Rating {
@@ -40,8 +38,8 @@ export interface Reply {
   _id: string;
   userId: string;
   username: string;
-  avatarUrl?: string;
   content: string;
+  avatarUrl?: string;
   createdAt: string;
 }
 

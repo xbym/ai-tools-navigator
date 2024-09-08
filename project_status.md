@@ -251,16 +251,99 @@
     - 安装了 @vercel/speed-insights 包
     - 在根布局文件中添加了 SpeedInsights 组件
     - 部署应用并验证了 Speed Insights 功能的正常工作
+91. 优化了评论系统的移动端显示
+    - 在 CommentSection 和 CommentList 组件中添加了响应式设计
+    - 使用 Tailwind CSS 的移动端优先类调整了布局和字体大小
+    - 优化了按钮和输入框在移动设备上的可用性
+92. 修复了评论回复功能的问题
+    - 在 CommentSection 组件中正确处理回复状态
+    - 确保点击回复按钮后显示回复输入框
+    - 优化了 ReplyForm 组件的显示和提交逻辑
+    - 添加了回复内容验证，防止提交空回复
+93. 修复了评论回复功能的认证问题
+    - 优化了 ReplyForm 组件中的错误处理
+    - 改进了 authMiddleware 中的 token 验证逻辑
+    - 更新了评论回复 API 路由以正确使用 authMiddleware
+    - 增加了更详细的错误日志记录
+94. 修复了评论回复功能中的用户名缺失问题
+    - 在回复API中添加了获取用户信息的逻辑
+    - 确保在添加回复时包含用户名和头像URL
+    - 更新了AITool模型中的ReplySchema，确保username字段为必填
+95. 优化了评论回复的错误处理和用户体验
+    - 在ReplyForm组件中添加了更详细的错误处理和用户反馈
+    - 确保用户登录后才能提交回复
+    - 改进了回复提交失败时的错误信息显示
+96. 修复了评论反应（点赞/踩）功能的路由处理问题
+    - 在 reaction API 路由中添加了适当的响应返回
+    - 确保在所有情况下都返回 NextResponse
+    - 增加了错误处理和日志记录
+97. 优化了评论点赞/踩功能的用户体验
+    - 实现了点赞/踩的即时反馈
+    - 优化了 useCommentActions hook 以处理单个评论的更新
+    - 更新了 CommentList 组件以反映点赞状态的即时变化
+    - 改进了 CommentSection 组件的状态管理，实现了局部更新
+98. 修复了管理员通知 API 的类型错误
+    - 更正了 PUT 方法中 authMiddleware 的使用方式
+    - 确保了 GET 和 PUT 方法的一致性
+    - 优化了错误处理和日志记录
+99. 修复了被举报评论 API 的类型错误
+    - 更新了 GET 方法的返回类型
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理
+100. 修复了评论回复编辑和删除 API 的类型错误
+    - 更新了 PUT 和 DELETE 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+101. 修复了评论举报 API 的类型错误
+    - 更新了 POST 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+102. 修复了评论添加 API 的类型错误
+    - 更新了 POST 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+103. 修复了评论删除 API 的类型错误
+    - 更新了 DELETE 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+104. 修复了工具添加 API 的类型错误
+    - 更新了 POST 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+105. 修复了工具更新和删除 API 的类型错误
+    - 更新了 PUT 和 DELETE 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+106. 修复了用户资料 API 的类型错误
+    - 更新了 GET 和 PUT 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
+107. 修复了用户资料更新 API 的类型错误
+    - 更新了 PUT 方法的返回类型
+    - 添加了用户权限检查
+    - 确保了与其他 API 路由的一致性
+    - 优化了错误处理和日志记录
 
 ## 需要解决的问题和下一步计划
 
-1. 评论系统优化
+1. 评论系统进一步优化
    - 实现评论的无限滚动加载，替代当前的分页方式
    - 优化大量评论和回复时的加载性能
    - 实现评论的热度排序算法
    - 考虑实现评论内容的富文本编辑
    - 添加评论的多语言支持
    - 优化移动端的评论显示和交互体验
+     * 调整评论布局,确保在小屏幕设备上易于阅读
+     * 优化评论输入框,提高移动端用户的输入体验
+     * 实现手势操作,如滑动回复或点赞
+     * 优化评论加载性能,考虑使用虚拟滚动技术
 
 2. 用户体验改进
    - 确保所有评论和回复的用户头像都能正确显示
@@ -274,7 +357,7 @@
    - 实现评论数据的缓存策略，减少数据库查询压力
 
 4. 数据分析和性能优化
-   - 添加评论的数据分析功能，如评论情感分析、用户活跃度分析等
+   - 添加论的数据分析功能，如评论情感分析、用户活跃度分析等
    - 实现评论相关的数据库查询优化，考虑使用索引提高性能
    - 监控和优化评论系统在生产环境中的性能表现
 
@@ -348,61 +431,57 @@ ai-tools-navigator/
 ├── src/                       # 源代码目录
 │   ├── app/                   # Next.js 13+ App Router 目录
 │   │   ├── admin/             # 管理员相关页面
-│   │   │   ├── edit-tool/     # 编辑工具页面
-│   │   │   └── page.tsx       # 管理员主页
-│   │   ├── api/               # API 路由目录
-│   │   │   ├── auth/          # 认证相关 API
 │   │   │   ├── tools/         # 工具相关 API
-│   │   │   │   ├── [id]/     # 工具详情页面
-│   │   │   │   │   └── comments/ # 评论相关 API
-│   │   │   │   │   │   └── [commentId]/ # 评论详情页面
-│   │   │   │   │   │   │   └── reply/ # 回复相关 API
-│   │   │   │   │   │   │   │   └── [replyId]/ # 回复详情页面
-│   │   │   │   │   │   │   │   │   └── route.ts # 处理评论回复的 API 路由
-│   │   │   │   │   │   │   └── route.ts    # 处理评论回复的 API 路由
-│   │   │   └── users/         # 用户相关 API
-│   │   ├── login/             # 登录页面
-│   │   ├── profile/           # 用户资料页面
-│   │   ├── submit-tool/       # 提交工具页面
-│   │   ├── tools/             # 工具详情页面
-│   │   ├── global-error.js    # 全局错误处理
-│   │   ├── layout.tsx         # 全局布局组件
-│   │   ├── not-found.tsx      # 404 页面
-│   │   └── page.tsx           # 首页
-│   ├── components/            # React 组件目录
-│   │   ├── AdminRoute.tsx     # 管理员路由保护组件
-│   │   ├── AIToolCard.tsx     # AI 工具卡片组件
-│   │   ├── AIToolListWrapper.tsx # AI 工具列表包装器
-│   │   ├── AuthProvider.tsx   # 认证提供者组件
-│   │   ├── CloudinaryCheck.tsx # Cloudinary 配置检查组件
-│   │   ├── ErrorBoundary.tsx  # 错误边界组件
-│   │   ├── ImageUpload.tsx    # 图片上传组件
-│   │   ├── Layout.tsx         # 布局组件
-│   │   ├── LoadingSpinner.tsx # 加载动画组件
-│   │   ├── NavMenu.tsx        # 导航菜单组件
-│   │   ├── ReplyForm.tsx      # 回复表单组件
-│   │   ├── PasswordStrengthIndicator.tsx # 密码强度指示器
-│   │   ├── EditProfileForm.tsx # 用户资料编辑表单组件
-│   │   └── ...
-│   ├── lib/                   # 库文件目录
-│   │   └── dbConnect.ts       # 数据库连接函数
-│   ├── middleware/            # 中间件目录
-│   │   ├── errorHandler.ts    # 错误处理中间件
-│   │   └── roleMiddleware.ts  # 角色中间件
-│   ├── models/                # 数据模型目录
-│   │   ├── AITool.ts          # AI 工具模型
-│   │   ├── ErrorLog.ts        # 错误日志模型
-│   │   └── User.ts            # 用户模型
-│   ├── types/                 # 类型定义目录
-│   │   ├── user.ts            # 用户相关类型定义
-│   │   └── next.d.ts          # Next.js 类型扩展
-│   └── utils/                 # 工具函数目录
-│       ├── apiErrors.ts       # API 错误处理工具
-│       ├── auth.ts            # 认证相关工具
-│       ├── emailTemplates.ts  # 邮件模板
-│       └── logger.ts          # 日志工具
-└── stories/                   # Storybook 组件故事目录
-    └── Button.stories.ts      # 按钮组件故事
+ │   │   │   │   ├── [id]/     # 工具详情页面
+ │   │   │   │   │   └── comments/ # 评论相关 API
+ │   │   │   │   │   │   └── [commentId]/ # 评论详情页面
+ │   │   │   │   │   │   │   └── reply/ # 回复相关 API
+ │   │   │   │   │   │   │   │   └── [replyId]/ # 回复详情页面
+ │   │   │   │   │   │   │   │   │   └── route.ts # 处理评论回复的 API 路由
+ │   │   │   │   │   │   │   └── route.ts    # 处理评论回复的 API 路由
+ │   │   │   └── users/         # 用户相关 API
+ │   │   ├── login/             # 登录页面
+ │   │   ├── profile/           # 用户资料页面
+ │   │   ├── submit-tool/       # 提交工具页面
+ │   │   ├── tools/             # 工具详情页面
+ │   │   ├── global-error.js    # 全局错误处理
+ │   │   ├── layout.tsx         # 全局布局组件
+ │   │   ├── not-found.tsx      # 404 页面
+ │   │   └── page.tsx           # 首页
+ │   ├── components/            # React 组件目录
+ │   │   ├── AdminRoute.tsx     # 管理员路由保护组件
+ │   │   ├── AIToolCard.tsx     # AI 工具卡片组件
+ │   │   ├── AIToolListWrapper.tsx # AI 工具列表包装器
+ │   │   ├── AuthProvider.tsx   # 认证提供者组件
+ │   │   ├── CloudinaryCheck.tsx # Cloudinary 配置检查组件
+ │   │   ├── ErrorBoundary.tsx  # 错误边界组件
+ │   │   ├── ImageUpload.tsx    # 图片上传组件
+ │   │   ├── Layout.tsx         # 布局组件
+ │   │   ├── LoadingSpinner.tsx # 加载动画组件
+ │   │   ├── NavMenu.tsx        # 导航菜单组件
+ │   │   ├── ReplyForm.tsx      # 回复表单组件
+ │   │   ├── PasswordStrengthIndicator.tsx # 密码强度指示器
+ │   │   ├── EditProfileForm.tsx # 用户资料编辑表单组件
+ │   │   └── ...
+ │   ├── lib/                   # 库文件目录
+ │   │   └── dbConnect.ts       # 数据库连接函数
+ │   ├── middleware/            # 中间件目录
+ │   │   ├── errorHandler.ts    # 错误处理中间件
+ │   │   └── roleMiddleware.ts  # 角色中间件
+ │   ├── models/                # 数据模型目录
+ │   │   ├── AITool.ts          # AI 工具模型
+ │   │   ├── ErrorLog.ts        # 错误日志模型
+ │   │   └── User.ts            # 用户模型
+ │   ├── types/                 # 类型定义目录
+ │   │   ├── user.ts            # 用户相关类型定义
+ │   │   └── next.d.ts          # Next.js 类型扩展
+ │   └── utils/                 # 工具函数目录
+ │       ├── apiErrors.ts       # API 错误处理工具
+ │       ├── auth.ts            # 认证相关工具
+ │       ├── emailTemplates.ts  # 邮件模板
+ │       └── logger.ts          # 日志工具
+ └── stories/                   # Storybook 组件故事目录
+     └── Button.stories.ts      # 按钮组件故事
 
 ## 文件结构说明
 
@@ -435,4 +514,6 @@ ai-tools-navigator/
 ## 最近更新
 - 集成了 Vercel Speed Insights,提供了详细的网站性能分析
 - 优化了评论回复功能,提高了用户交互体验
+- 实现了基本的管理员仪表板,增强了网站的管理能力
+- 改进了评论系统的移动端适配,提升了小屏幕设备的用户体验
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { errorHandler } from '@/middleware/errorHandler';
-import { authMiddleware } from '@/middleware/authMiddleware'; // 添加这行
+import { authMiddleware } from '@/middleware/authMiddleware';
+import { errorHandler } from '@/middleware/errorHandler'; // 添加这行
 import { logger } from '@/utils/logger';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
@@ -17,22 +17,24 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       await dbConnect();
       const data = await req.json();
+      // @ts-ignore
+      const userId = req.user.userId;
       const tool = await AITool.create({ ...data, createdBy: userId });
       return NextResponse.json(tool, { status: 201 });
     } catch (error) {
       console.error('Error creating tool:', error);
       return NextResponse.json({ message: 'Error creating tool' }, { status: 500 });
     }
-  });
+  })(request);
 }
 
 // 同样更新 PUT 和 DELETE 方法
 export async function PUT(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       logger.info('Updating AI tool');
       await dbConnect();
@@ -41,6 +43,8 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ message: 'Tool ID is required' }, { status: 400 });
       }
       const data = await req.json();
+      // @ts-ignore
+      const userId = req.user.userId;
       const tool = await AITool.findOneAndUpdate({ _id: id, createdBy: userId }, data, { new: true });
       if (!tool) {
         return NextResponse.json({ message: 'Tool not found or you do not have permission to update it' }, { status: 404 });
@@ -50,11 +54,11 @@ export async function PUT(request: NextRequest) {
     } catch (error) {
       return errorHandler(error, request);
     }
-  });
+  })(request);
 }
 
 export async function DELETE(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       logger.info('Deleting AI tool');
       await dbConnect();
@@ -62,6 +66,8 @@ export async function DELETE(request: NextRequest) {
       if (!id) {
         return NextResponse.json({ message: 'Tool ID is required' }, { status: 400 });
       }
+      // @ts-ignore
+      const userId = req.user.userId;
       const tool = await AITool.findOneAndDelete({ _id: id, createdBy: userId });
       if (!tool) {
         return NextResponse.json({ message: 'Tool not found or you do not have permission to delete it' }, { status: 404 });
@@ -71,7 +77,7 @@ export async function DELETE(request: NextRequest) {
     } catch (error) {
       return errorHandler(error, request);
     }
-  });
+  })(request);
 }
 
 // 同样更新 PUT 和 DELETE 方法

@@ -1,32 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { errorHandler } from '@/middleware/errorHandler';
 import { authMiddleware } from '@/middleware/authMiddleware';
-import { logger } from '@/utils/logger';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
 export async function PUT(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
-      logger.info('Updating user profile');
       await dbConnect();
+      const { username, email, avatarUrl } = await req.json();
+      // @ts-ignore
+      const userId = req.user.userId;
 
-      const { username, email } = await req.json();
-      const user = await User.findById(userId);
-
+      const user = await User.findByIdAndUpdate(userId, { username, email, avatarUrl }, { new: true }).select('-password');
       if (!user) {
-        logger.warn('Profile update failed: User not found', { userId });
         return NextResponse.json({ message: 'User not found' }, { status: 404 });
       }
 
-      user.username = username || user.username;
-      user.email = email || user.email;
-      await user.save();
-
-      logger.info('Profile updated successfully', { userId: user._id });
-      return NextResponse.json({ message: 'Profile updated successfully' });
+      return NextResponse.json(user);
     } catch (error) {
-      return errorHandler(error, request);
+      console.error('Error updating user profile:', error);
+      return NextResponse.json({ message: 'Error updating user profile' }, { status: 500 });
     }
-  });
+  })(request);
 }

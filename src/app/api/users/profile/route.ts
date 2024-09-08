@@ -1,38 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/middleware/authMiddleware';
-import { errorHandler } from '@/middleware/errorHandler';
+import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
 export async function GET(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
+      await dbConnect();
+      // @ts-ignore
+      const userId = req.user.userId;
+
       const user = await User.findById(userId).select('-password');
       if (!user) {
-        return NextResponse.json({ message: '用户不存在' }, { status: 404 });
+        return NextResponse.json({ message: 'User not found' }, { status: 404 });
       }
+
       return NextResponse.json(user);
     } catch (error) {
-      return errorHandler(error, request);
+      console.error('Error fetching user profile:', error);
+      return NextResponse.json({ message: 'Error fetching user profile' }, { status: 500 });
     }
-  });
+  })(request);
 }
 
 export async function PUT(request: NextRequest) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
-      const data = await req.json();
-      const { username, email, avatarUrl } = data;
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { username, email, avatarUrl },
-        { new: true, select: '-password' }
-      );
+      await dbConnect();
+      const { username, email, avatarUrl } = await req.json();
+      // @ts-ignore
+      const userId = req.user.userId;
+
+      const user = await User.findByIdAndUpdate(userId, { username, email, avatarUrl }, { new: true }).select('-password');
       if (!user) {
-        return NextResponse.json({ message: '用户不存在' }, { status: 404 });
+        return NextResponse.json({ message: 'User not found' }, { status: 404 });
       }
+
       return NextResponse.json(user);
     } catch (error) {
-      return errorHandler(error, request);
+      console.error('Error updating user profile:', error);
+      return NextResponse.json({ message: 'Error updating user profile' }, { status: 500 });
     }
-  });
+  })(request);
 }

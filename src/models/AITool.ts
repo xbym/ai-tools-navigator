@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 const ReplySchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true },
+  username: { type: String, required: true }, // 确保这行存在
   content: { type: String, required: true },
   avatarUrl: { type: String, default: '/default-avatar.png' },
   createdAt: { type: Date, default: Date.now }

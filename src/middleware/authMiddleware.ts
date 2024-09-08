@@ -29,28 +29,29 @@ export function withAuth(handler: any) {
   };
 }
 
-export async function authMiddleware(
-  request: NextRequest,
-  handler: (req: NextRequest, userId: string) => Promise<NextResponse>
-) {
-  try {
-    const token = request.headers.get('Authorization')?.split(' ')[1];
-    if (!token) {
-      logger.warn('No token provided in request');
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+export function authMiddleware(handler: Function) {
+  return async (req: NextRequest, ...args: any[]) => {
+    try {
+      const token = req.headers.get('Authorization')?.split(' ')[1];
+      
+      if (!token) {
+        logger.warn('No token provided');
+        return NextResponse.json({ message: '未提供认证令牌' }, { status: 401 });
+      }
 
-    logger.debug(`Received token: ${token}`);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
-    logger.debug(`Decoded userId: ${decoded.userId}`);
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+        // @ts-ignore
+        req.user = decoded;
+      } catch (error) {
+        logger.error('Error verifying JWT:', error);
+        return NextResponse.json({ message: '无效的认证令牌' }, { status: 401 });
+      }
 
-    if (!mongoose.Types.ObjectId.isValid(decoded.userId)) {
-      logger.error(`Invalid userId in token: ${decoded.userId}`);
-      return NextResponse.json({ message: 'Invalid user ID' }, { status: 401 });
+      return handler(req, ...args);
+    } catch (error) {
+      logger.error('Error in authMiddleware:', error);
+      return NextResponse.json({ message: '服务器错误' }, { status: 500 });
     }
-    return handler(request, decoded.userId);
-  } catch (error) {
-    logger.error('Error in authMiddleware:', error);
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  }
+  };
 }

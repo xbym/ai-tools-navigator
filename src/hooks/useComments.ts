@@ -3,17 +3,14 @@ import { Comment } from '@/types/AITool';
 
 interface UseCommentsProps {
   toolId: string;
-  initialPage?: number;
-  initialSortBy?: string;
-  initialSortOrder?: 'asc' | 'desc';
 }
 
-export function useComments({ toolId, initialPage = 1, initialSortBy = 'createdAt', initialSortOrder = 'desc' }: UseCommentsProps) {
+export function useComments({ toolId }: UseCommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState(initialSortBy);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(initialSortOrder);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +26,9 @@ export function useComments({ toolId, initialPage = 1, initialSortBy = 'createdA
       const data = await response.json();
       setComments(data.comments);
       setTotalPages(data.totalPages);
+      setCurrentPage(page);
     } catch (err) {
-      setError('Error fetching comments');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -39,28 +36,10 @@ export function useComments({ toolId, initialPage = 1, initialSortBy = 'createdA
 
   useEffect(() => {
     fetchComments(currentPage);
-
-    const intervalId = setInterval(() => {
-      fetchComments(currentPage);
-    }, 30000);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchComments(currentPage);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, [fetchComments, currentPage]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
+    setCurrentPage(newPage);
   };
 
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -77,6 +56,7 @@ export function useComments({ toolId, initialPage = 1, initialSortBy = 'createdA
 
   return {
     comments,
+    setComments,
     currentPage,
     totalPages,
     sortBy,

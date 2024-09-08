@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authMiddleware } from '@/middleware/authMiddleware';
 import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
 import Notification from '@/models/Notification';
-import { authMiddleware } from '@/middleware/authMiddleware';
+import { logger } from '@/utils/logger';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string; commentId: string } }
 ) {
-  return authMiddleware(request, async (req: NextRequest, userId: string) => {
+  return authMiddleware(async (req: NextRequest) => {
     try {
       await dbConnect();
       const { id: toolId, commentId } = params;
+      // @ts-ignore
+      const userId = req.user.userId;
 
       const tool = await AITool.findById(toolId);
       if (!tool) {
@@ -38,10 +41,11 @@ export async function POST(
         reporterId: userId
       });
 
+      logger.info(`User ${userId} reported comment ${commentId} for tool ${toolId}`);
       return NextResponse.json({ message: 'Comment reported successfully' });
     } catch (error) {
-      console.error('Error reporting comment:', error);
+      logger.error('Error reporting comment:', error);
       return NextResponse.json({ message: 'Error reporting comment' }, { status: 500 });
     }
-  });
+  })(request);
 }
