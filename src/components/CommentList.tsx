@@ -1,97 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Comment, Reply } from '@/types/AITool';
-import { useAuth } from '@/hooks/useAuth';
+import { useCommentActions } from '@/hooks/useCommentActions';
 
 interface CommentListProps {
   comments: Comment[];
   toolId: string;
   onCommentUpdated: () => void;
+  onReply: (commentId: string, content: string) => Promise<void>;
+  onReaction: (commentId: string, reaction: 'like' | 'dislike') => Promise<void>;
+  onReport: (commentId: string) => Promise<void>;
 }
 
-export default function CommentList({ comments, toolId, onCommentUpdated }: CommentListProps) {
-  const { user } = useAuth();
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState('');
-
-  const handleReply = async (commentId: string) => {
-    if (!replyContent.trim()) {
-      alert('回复内容不能为空');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ content: replyContent })
-      });
-
-      if (response.ok) {
-        onCommentUpdated();
-        setReplyingTo(null);
-        setReplyContent('');
-      } else {
-        console.error('Failed to post reply');
-      }
-    } catch (error) {
-      console.error('Error posting reply:', error);
-    }
-  };
-
-  const handleReaction = async (commentId: string, reaction: 'like' | 'dislike') => {
-    if (!user) {
-      alert('请先登录后再进行操作');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/reaction`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ reaction })
-      });
-
-      if (response.ok) {
-        onCommentUpdated();
-      } else {
-        console.error('Failed to update reaction');
-      }
-    } catch (error) {
-      console.error('Error updating reaction:', error);
-    }
-  };
-
-  const handleReport = async (commentId: string) => {
-    if (!user) {
-      alert('请先登录后再进行操作');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/tools/${toolId}/comments/${commentId}/report`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        alert('举报成功，我们会尽快处理');
-        onCommentUpdated();
-      } else {
-        console.error('Failed to report comment');
-      }
-    } catch (error) {
-      console.error('Error reporting comment:', error);
-    }
-  };
+export default function CommentList({ 
+  comments, 
+  toolId, 
+  onCommentUpdated,
+  onReply,
+  onReaction,
+  onReport
+}: CommentListProps) {
+  const {
+    replyingTo,
+    setReplyingTo,
+    replyContent,
+    setReplyContent,
+  } = useCommentActions(toolId, onCommentUpdated);
 
   const renderReplies = (replies: Reply[]) => {
     return replies.map((reply) => (
@@ -130,13 +63,13 @@ export default function CommentList({ comments, toolId, onCommentUpdated }: Comm
           </div>
           <div className="mt-2 flex items-center space-x-4">
             <button
-              onClick={() => handleReaction(comment._id, 'like')}
+              onClick={() => onReaction(comment._id, 'like')}
               className={`text-sm ${comment.userReaction === 'like' ? 'text-blue-500' : 'text-gray-400'} hover:text-blue-300`}
             >
               👍 {comment.likes}
             </button>
             <button
-              onClick={() => handleReaction(comment._id, 'dislike')}
+              onClick={() => onReaction(comment._id, 'dislike')}
               className={`text-sm ${comment.userReaction === 'dislike' ? 'text-red-500' : 'text-gray-400'} hover:text-red-300`}
             >
               👎 {comment.dislikes}
@@ -148,7 +81,7 @@ export default function CommentList({ comments, toolId, onCommentUpdated }: Comm
               回复
             </button>
             <button
-              onClick={() => handleReport(comment._id)}
+              onClick={() => onReport(comment._id)}
               className="text-yellow-400 hover:text-yellow-300 text-sm"
             >
               举报
@@ -164,7 +97,7 @@ export default function CommentList({ comments, toolId, onCommentUpdated }: Comm
                 onChange={(e) => setReplyContent(e.target.value)}
               />
               <button
-                onClick={() => handleReply(comment._id)}
+                onClick={() => onReply(comment._id, replyContent)}
                 className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
                 提交回复

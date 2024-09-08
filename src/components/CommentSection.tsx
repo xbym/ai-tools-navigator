@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useComments } from '@/hooks/useComments';
+import { useCommentActions } from '@/hooks/useCommentActions';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 import Pagination from './Pagination';
@@ -28,9 +29,11 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     fetchComments
   } = useComments({ toolId });
 
-  const handleCommentAdded = () => {
-    fetchComments(currentPage);
-  };
+  const {
+    handleReply,
+    handleReaction,
+    handleReport
+  } = useCommentActions(toolId, () => fetchComments(currentPage));
 
   if (isLoading) return <div>Loading comments...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -39,7 +42,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
     <div className="mt-8 bg-gray-800 p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-white">评论</h2>
       {user ? (
-        <CommentForm toolId={toolId} onCommentAdded={handleCommentAdded} />
+        <CommentForm toolId={toolId} onCommentAdded={() => fetchComments(currentPage)} />
       ) : (
         <p className="text-white mb-4">请登录后发表评论</p>
       )}
@@ -62,7 +65,14 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
           <option value="rating-asc">评分从低到高</option>
         </select>
       </div>
-      <CommentList comments={comments} toolId={toolId} onCommentUpdated={() => fetchComments(currentPage)} />
+      <CommentList 
+        comments={comments} 
+        toolId={toolId} 
+        onCommentUpdated={() => fetchComments(currentPage)}
+        onReply={handleReply}
+        onReaction={handleReaction}
+        onReport={handleReport}
+      />
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
