@@ -330,6 +330,9 @@
     - 添加了用户权限检查
     - 确保了与其他 API 路由的一致性
     - 优化了错误处理和日志记录
+108. 优化了 useCommentActions hook
+    - 将其拆分为更小的专用 hooks：useReply、useReaction 和 useReport
+    - 更新了 CommentSection 组件以使用新的 hooks
 
 ## 需要解决的问题和下一步计划
 
@@ -370,8 +373,8 @@
 
 1. 代码重构
    - ✓ 重构 CommentSection 组件，将部分逻辑抽离为自定义 hooks
-   - 继续优化 useCommentActions hook，考虑将其拆分为更小的专用hooks
-   - 重构 CommentForm 组件，使用新的 hook 结构
+   - ✓ 继续优化 useCommentActions hook，考虑将其拆分为更小的专用hooks
+   - ✓ 重构 CommentForm 组件，使用新的 hook 结构
 
 2. 依赖管理
    - 更新依赖包版本，特别是 Next.js 和 React
@@ -432,56 +435,56 @@ ai-tools-navigator/
 │   ├── app/                   # Next.js 13+ App Router 目录
 │   │   ├── admin/             # 管理员相关页面
 │   │   │   ├── tools/         # 工具相关 API
- │   │   │   │   ├── [id]/     # 工具详情页面
- │   │   │   │   │   └── comments/ # 评论相关 API
- │   │   │   │   │   │   └── [commentId]/ # 评论详情页面
- │   │   │   │   │   │   │   └── reply/ # 回复相关 API
- │   │   │   │   │   │   │   │   └── [replyId]/ # 回复详情页面
- │   │   │   │   │   │   │   │   │   └── route.ts # 处理评论回复的 API 路由
- │   │   │   │   │   │   │   └── route.ts    # 处理评论回复的 API 路由
- │   │   │   └── users/         # 用户相关 API
- │   │   ├── login/             # 登录页面
- │   │   ├── profile/           # 用户资料页面
- │   │   ├── submit-tool/       # 提交工具页面
- │   │   ├── tools/             # 工具详情页面
- │   │   ├── global-error.js    # 全局错误处理
- │   │   ├── layout.tsx         # 全局布局组件
- │   │   ├── not-found.tsx      # 404 页面
- │   │   └── page.tsx           # 首页
- │   ├── components/            # React 组件目录
- │   │   ├── AdminRoute.tsx     # 管理员路由保护组件
- │   │   ├── AIToolCard.tsx     # AI 工具卡片组件
- │   │   ├── AIToolListWrapper.tsx # AI 工具列表包装器
- │   │   ├── AuthProvider.tsx   # 认证提供者组件
- │   │   ├── CloudinaryCheck.tsx # Cloudinary 配置检查组件
- │   │   ├── ErrorBoundary.tsx  # 错误边界组件
- │   │   ├── ImageUpload.tsx    # 图片上传组件
- │   │   ├── Layout.tsx         # 布局组件
- │   │   ├── LoadingSpinner.tsx # 加载动画组件
- │   │   ├── NavMenu.tsx        # 导航菜单组件
- │   │   ├── ReplyForm.tsx      # 回复表单组件
- │   │   ├── PasswordStrengthIndicator.tsx # 密码强度指示器
- │   │   ├── EditProfileForm.tsx # 用户资料编辑表单组件
- │   │   └── ...
- │   ├── lib/                   # 库文件目录
- │   │   └── dbConnect.ts       # 数据库连接函数
- │   ├── middleware/            # 中间件目录
- │   │   ├── errorHandler.ts    # 错误处理中间件
- │   │   └── roleMiddleware.ts  # 角色中间件
- │   ├── models/                # 数据模型目录
- │   │   ├── AITool.ts          # AI 工具模型
- │   │   ├── ErrorLog.ts        # 错误日志模型
- │   │   └── User.ts            # 用户模型
- │   ├── types/                 # 类型定义目录
- │   │   ├── user.ts            # 用户相关类型定义
- │   │   └── next.d.ts          # Next.js 类型扩展
- │   └── utils/                 # 工具函数目录
- │       ├── apiErrors.ts       # API 错误处理工具
- │       ├── auth.ts            # 认证相关工具
- │       ├── emailTemplates.ts  # 邮件模板
- │       └── logger.ts          # 日志工具
- └── stories/                   # Storybook 组件故事目录
-     └── Button.stories.ts      # 按钮组件故事
+│   │   │   │   ├── [id]/     # 工具详情页面
+│   │   │   │   │   └── comments/ # 评论相关 API
+│   │   │   │   │   │   └── [commentId]/ # 评论详情页面
+│   │   │   │   │   │   │   └── reply/ # 回复相关 API
+│   │   │   │   │   │   │   │   └── [replyId]/ # 回复详情页面
+│   │   │   │   │   │   │   │   │   └── route.ts # 处理评论回复的 API 路由
+│   │   │   │   │   │   │   └── route.ts    # 处理评论回复的 API 路由
+│   │   │   └── users/         # 用户相关 API
+│   │   ├── login/             # 登录页面
+│   │   ├── profile/           # 用户资料页面
+│   │   ├── submit-tool/       # 提交工具页面
+│   │   ├── tools/             # 工具详情页面
+│   │   ├── global-error.js    # 全局错误处理
+│   │   ├── layout.tsx         # 全局布局组件
+│   │   ├── not-found.tsx      # 404 页面
+│   │   └── page.tsx           # 首页
+│   ├── components/            # React 组件目录
+│   │   ├── AdminRoute.tsx     # 管理员路由保护组件
+│   │   ├── AIToolCard.tsx     # AI 工具卡片组件
+│   │   ├── AIToolListWrapper.tsx # AI 工具列表包装器
+│   │   ├── AuthProvider.tsx   # 认证提供者组件
+│   │   ├── CloudinaryCheck.tsx # Cloudinary 配置检查组件
+│   │   ├── ErrorBoundary.tsx  # 错误边界组件
+│   │   ├── ImageUpload.tsx    # 图片上传组件
+│   │   ├── Layout.tsx         # 布局组件
+│   │   ├── LoadingSpinner.tsx # 加载动画组件
+│   │   ├── NavMenu.tsx        # 导航菜单组件
+│   │   ├── ReplyForm.tsx      # 回复表单组件
+│   │   ├── PasswordStrengthIndicator.tsx # 密码强度指示器
+│   │   ├── EditProfileForm.tsx # 用户资料编辑表单组件
+│   │   └── ...
+│   ├── lib/                   # 库文件目录
+│   │   └── dbConnect.ts       # 数据库连接函数
+│   ├── middleware/            # 中间件目录
+│   │   ├── errorHandler.ts    # 错误处理中间件
+│   │   └── roleMiddleware.ts  # 角色中间件
+│   ├── models/                # 数据模型目录
+│   │   ├── AITool.ts          # AI 工具模型
+│   │   ├── ErrorLog.ts        # 错误日志模型
+│   │   └── User.ts            # 用户模型
+│   ├── types/                 # 类型定义目录
+│   │   ├── user.ts            # 用户相关类型定义
+│   │   └── next.d.ts          # Next.js 类型扩展
+│   └── utils/                 # 工具函数目录
+│       ├── apiErrors.ts       # API 错误处理工具
+│       ├── auth.ts            # 认证相关工具
+│       ├── emailTemplates.ts  # 邮件模板
+│       └── logger.ts          # 日志工具
+└── stories/                   # Storybook 组件故事目录
+ └── Button.stories.ts      # 按钮组件故事
 
 ## 文件结构说明
 

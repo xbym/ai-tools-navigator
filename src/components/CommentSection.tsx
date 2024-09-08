@@ -2,13 +2,15 @@
 
 import React, { useState } from 'react';
 import { useComments } from '@/hooks/useComments';
-import { useCommentActions } from '@/hooks/useCommentActions';
+import { useReply } from '@/hooks/useReply';
+import { useReaction } from '@/hooks/useReaction';
+import { useReport } from '@/hooks/useReport';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 import Pagination from './Pagination';
 import { useAuth } from '@/hooks/useAuth';
 import ReplyForm from './ReplyForm';
-import { Comment } from '@/types/AITool'; // 确保导入 Comment 类型
+import { Comment } from '@/types/AITool';
 
 interface CommentSectionProps {
   toolId: string;
@@ -16,11 +18,9 @@ interface CommentSectionProps {
 
 export default function CommentSection({ toolId }: CommentSectionProps) {
   const { user } = useAuth();
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-
   const {
     comments,
-    setComments, // 添加 setComments
+    setComments,
     currentPage,
     totalPages,
     sortBy,
@@ -50,10 +50,16 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
   };
 
   const {
-    handleReply,
-    handleReaction,
-    handleReport
-  } = useCommentActions(toolId, () => fetchComments(currentPage));
+    replyingTo,
+    setReplyingTo,
+    replyContent,
+    setReplyContent,
+    handleReply
+  } = useReply(toolId, () => fetchComments(currentPage));
+
+  const { handleReaction } = useReaction(toolId, handleCommentUpdated);
+
+  const { handleReport } = useReport(toolId, () => fetchComments(currentPage));
 
   const handleReplyClick = (commentId: string) => {
     setReplyingTo(commentId);
@@ -94,10 +100,7 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
         toolId={toolId} 
         onCommentUpdated={handleCommentUpdated}
         onReply={handleReplyClick}
-        onReaction={(commentId, type) => {
-          handleReaction(commentId, type);
-          handleCommentUpdated(commentId, type);
-        }}
+        onReaction={handleReaction}
         onReport={handleReport}
       />
       {replyingTo && (

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
+import { useCommentForm } from '@/hooks/useCommentForm';
 
 interface CommentFormProps {
   toolId: string;
@@ -7,76 +7,46 @@ interface CommentFormProps {
 }
 
 export default function CommentForm({ toolId, onCommentAdded }: CommentFormProps) {
-  const [content, setContent] = useState('');
-  const [rating, setRating] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, token } = useAuth();  // 获取token
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !token) {
-      alert('请先登录后再评论');
-      return;
-    }
-    if (rating === 0) {
-      alert('请选择评分');
-      return;
-    }
-    if (!content.trim()) {
-      alert('评论内容不能为空');
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/tools/${toolId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content, rating }),
-      });
-      // ... 处理响应 ...
-    } catch (error) {
-      // ... 错误处理 ...
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    content,
+    setContent,
+    rating,
+    setRating,
+    isLoading,
+    handleSubmit
+  } = useCommentForm(toolId, onCommentAdded);
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-300">评论内容</label>
-        <textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={4}
-        ></textarea>
-      </div>
-      <div>
-        <label htmlFor="rating" className="block text-sm font-medium text-gray-300">评分</label>
+    <form onSubmit={handleSubmit} className="mt-4">
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="输入你的评论..."
+        className="w-full p-2 bg-gray-700 text-white rounded"
+        rows={3}
+        disabled={isLoading}
+      />
+      <div className="mt-2">
+        <label className="block text-sm font-medium text-gray-300 mb-1">评分</label>
         <select
-          id="rating"
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
-          className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 bg-gray-700 text-white rounded"
+          disabled={isLoading}
         >
           <option value={0}>选择评分</option>
-          {[1, 2, 3, 4, 5].map((value) => (
-            <option key={value} value={value}>{value} 星</option>
-          ))}
+          <option value={1}>1 星</option>
+          <option value={2}>2 星</option>
+          <option value={3}>3 星</option>
+          <option value={4}>4 星</option>
+          <option value={5}>5 星</option>
         </select>
       </div>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-blue-400"
-      >
-        {isSubmitting ? '提交中...' : '提交评论'}
-      </button>
+      <div className="mt-2">
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mr-2" disabled={isLoading}>
+          提交评论
+        </button>
+      </div>
     </form>
   );
 }

@@ -4,11 +4,12 @@ import dbConnect from '@/lib/dbConnect';
 import AITool from '@/models/AITool';
 import { logger } from '@/utils/logger';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   return authMiddleware(async (req: NextRequest) => {
     try {
       await dbConnect();
-      const { toolId, content, rating } = await req.json();
+      const { id: toolId } = params;
+      const { content, rating } = await req.json();
       // @ts-ignore
       const userId = req.user.userId;
 
