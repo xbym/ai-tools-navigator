@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useComments } from '@/hooks/useComments';
 import { useCommentActions } from '@/hooks/useCommentActions';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 import Pagination from './Pagination';
 import { useAuth } from '@/hooks/useAuth';
+import ReplyForm from './ReplyForm';
 
 interface CommentSectionProps {
   toolId: string;
@@ -14,6 +15,7 @@ interface CommentSectionProps {
 
 export default function CommentSection({ toolId }: CommentSectionProps) {
   const { user } = useAuth();
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const {
     comments,
     currentPage,
@@ -69,10 +71,21 @@ export default function CommentSection({ toolId }: CommentSectionProps) {
         comments={comments} 
         toolId={toolId} 
         onCommentUpdated={() => fetchComments(currentPage)}
-        onReply={handleReply}
+        onReply={(commentId) => setReplyingTo(commentId)}
         onReaction={handleReaction}
         onReport={handleReport}
       />
+      {replyingTo && (
+        <ReplyForm
+          commentId={replyingTo}
+          toolId={toolId}
+          onReplyAdded={() => {
+            fetchComments(currentPage);
+            setReplyingTo(null);
+          }}
+          onCancel={() => setReplyingTo(null)}
+        />
+      )}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

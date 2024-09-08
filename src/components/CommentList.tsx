@@ -6,9 +6,9 @@ interface CommentListProps {
   comments: Comment[];
   toolId: string;
   onCommentUpdated: () => void;
-  onReply: (commentId: string, content: string) => Promise<void>;
-  onReaction: (commentId: string, reaction: 'like' | 'dislike') => Promise<void>;
-  onReport: (commentId: string) => Promise<void>;
+  onReply: (commentId: string) => void;
+  onReaction: (commentId: string, type: 'like' | 'dislike') => void;
+  onReport: (commentId: string) => void;
 }
 
 export default function CommentList({ 
@@ -19,32 +19,6 @@ export default function CommentList({
   onReaction,
   onReport
 }: CommentListProps) {
-  const {
-    replyingTo,
-    setReplyingTo,
-    replyContent,
-    setReplyContent,
-  } = useCommentActions(toolId, onCommentUpdated);
-
-  const renderReplies = (replies: Reply[]) => {
-    return replies.map((reply) => (
-      <div key={reply._id} className="ml-8 mt-2 bg-gray-600 p-3 rounded">
-        <div className="flex items-center mb-1">
-          <img
-            src={reply.avatarUrl || '/default-avatar.png'}
-            alt={reply.username}
-            className="w-6 h-6 rounded-full mr-2"
-          />
-          <span className="font-semibold text-white text-sm">{reply.username}</span>
-        </div>
-        <p className="text-white text-sm">{reply.content}</p>
-        <div className="text-xs text-gray-400 mt-1">
-          回复于: {new Date(reply.createdAt).toLocaleString()}
-        </div>
-      </div>
-    ));
-  };
-
   return (
     <div className="space-y-4">
       {comments.map((comment) => (
@@ -75,7 +49,7 @@ export default function CommentList({
               👎 {comment.dislikes}
             </button>
             <button
-              onClick={() => setReplyingTo(comment._id)}
+              onClick={() => onReply(comment._id)}
               className="text-blue-400 hover:text-blue-300 text-sm"
             >
               回复
@@ -87,24 +61,23 @@ export default function CommentList({
               举报
             </button>
           </div>
-          {replyingTo === comment._id && (
-            <div className="mt-2">
-              <textarea
-                className="w-full p-2 bg-gray-600 text-white rounded"
-                placeholder="输入你的回复..."
-                rows={3}
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-              />
-              <button
-                onClick={() => onReply(comment._id, replyContent)}
-                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                提交回复
-              </button>
+          {comment.replies && comment.replies.length > 0 && (
+            <div className="mt-4 ml-4 space-y-2">
+              {comment.replies.map((reply) => (
+                <div key={reply._id} className="bg-gray-600 p-2 rounded flex items-center">
+                  <img
+                    src={reply.avatarUrl || '/default-avatar.png'}
+                    alt={reply.username}
+                    className="w-6 h-6 rounded-full mr-2"
+                  />
+                  <div>
+                    <span className="font-bold text-white text-sm">{reply.username}</span>
+                    <p className="text-sm text-gray-300">{reply.content}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-          {renderReplies(comment.replies)}
         </div>
       ))}
     </div>
