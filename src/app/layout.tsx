@@ -2,6 +2,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import { ToastProvider } from '@/contexts/ToastContext';
 import "./globals.css";
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function RootLayout({
   children,
@@ -10,6 +11,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>AI工具导航</title>
+      </head>
       <body>
         <ErrorBoundary>
           <AuthProvider>
@@ -18,6 +22,7 @@ export default function RootLayout({
             </ToastProvider>
           </AuthProvider>
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   );
