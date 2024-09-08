@@ -4,7 +4,7 @@ export interface AITool {
   description: string;
   category: string;
   url: string;
-  tags?: string[];  // 确保这是可选的
+  tags?: string[];
   iconUrl: string;
   screenshotUrl?: string;
   comments: Comment[];
@@ -15,7 +15,6 @@ export interface AITool {
 
 export interface Comment {
   _id: string;
-  userId: string;
   user: {
     id: string;
     username: string;
@@ -24,12 +23,12 @@ export interface Comment {
   content: string;
   rating: number;
   createdAt: string;
+  replies: Reply[];
   likes: number;
   dislikes: number;
   userReaction?: 'like' | 'dislike' | null;
-  reports?: string[];
-  toolId?: string;
-  replies: Reply[]; // 确保这里是一个数组
+  userReactions?: { [userId: string]: 'like' | 'dislike' };
+  reports: Report[]; // 新增字段
 }
 
 export interface Rating {
@@ -43,5 +42,12 @@ export interface Reply {
   username: string;
   avatarUrl?: string;
   content: string;
+  createdAt: string;
+}
+
+// 新增接口
+export interface Report {
+  userId: string;
+  reason: string;
   createdAt: string;
 }
