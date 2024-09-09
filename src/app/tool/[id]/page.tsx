@@ -5,11 +5,23 @@ import CommentSection from '@/components/CommentSection';
 import { AITool } from '@/types/AITool';
 
 async function getToolDetails(id: string): Promise<AITool> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tools/${id}`, { cache: 'no-store' });
+  console.log(`Fetching tool details for ID: ${id}`);
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/tools/${id}`;
+  console.log(`API URL: ${url}`);
+  const res = await fetch(url, { cache: 'no-store' });
+  console.log(`API response status: ${res.status}`);
   if (!res.ok) {
-    throw new Error('Failed to fetch tool details');
+    console.log(`API response not OK. Status: ${res.status}`);
+    if (res.status === 404) {
+      throw new Error('Tool not found');
+    }
+    const errorText = await res.text();
+    console.error('Error response:', errorText);
+    throw new Error(`Failed to fetch tool details: ${errorText}`);
   }
-  return res.json();
+  const data = await res.json();
+  console.log('Fetched tool data:', data);
+  return data;
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -32,10 +44,17 @@ export default async function ToolPage({ params }: { params: { id: string } }) {
   let tool: AITool;
 
   try {
+    console.log(`Attempting to fetch tool with ID: ${params.id}`);
     tool = await getToolDetails(params.id);
+    console.log('Successfully fetched tool:', tool);
   } catch (error) {
     console.error('Error fetching tool details:', error);
-    notFound();
+    if (error instanceof Error && error.message.includes('Tool not found')) {
+      console.log('Tool not found, calling notFound()');
+      notFound();
+    }
+    console.log('Throwing error for Next.js error boundary');
+    throw error;
   }
 
   return (
