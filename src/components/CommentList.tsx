@@ -1,6 +1,7 @@
 import React from 'react';
 import { Comment } from '@/types/AITool';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 
 interface CommentListProps {
   comments: Comment[];
@@ -26,10 +27,12 @@ export default function CommentList({
       {comments.map((comment) => (
         <div key={comment._id} className="bg-gray-700 p-3 sm:p-4 rounded-lg">
           <div className="flex items-center mb-2">
-            <img
+            <Image
               src={comment.user.avatarUrl || '/default-avatar.png'}
               alt={comment.user.username}
-              className="w-8 h-8 rounded-full mr-2"
+              width={40}
+              height={40}
+              className="rounded-full mr-2"
             />
             <span className="font-bold text-white text-sm sm:text-base">{comment.user.username}</span>
           </div>
@@ -70,10 +73,12 @@ export default function CommentList({
               {comment.replies.map((reply) => (
                 <div key={reply._id} className="mb-2">
                   <div className="flex items-center">
-                    <img
+                    <Image
                       src={reply.avatarUrl || '/default-avatar.png'}
                       alt={reply.username}
-                      className="w-6 h-6 rounded-full mr-2"
+                      width={24}
+                      height={24}
+                      className="rounded-full mr-2"
                     />
                     <span className="font-bold text-white text-xs sm:text-sm">{reply.username}</span>
                   </div>

@@ -5,12 +5,10 @@ export interface AITool {
   category: string;
   url: string;
   tags?: string[];
-  iconUrl: string;
-  screenshotUrl?: string;
-  comments: Comment[];
-  ratings: Rating[];
-  averageRating: number;
-  viewCount: number;
+  iconUrl?: string;
+  averageRating?: number;
+  viewCount?: number;
+  comments: Comment[]; // 添加这行
 }
 
 export interface Comment {

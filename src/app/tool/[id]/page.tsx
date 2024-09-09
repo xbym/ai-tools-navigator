@@ -1,66 +1,53 @@
 import { Suspense } from 'react';
-import { Metadata, ResolvingMetadata } from 'next'
-import AITool from '@/models/AITool'
-import dbConnect from '@/lib/dbConnect'
-import { notFound } from 'next/navigation'
-import Layout from '@/components/Layout'
-import dynamic from 'next/dynamic'
+import { notFound } from 'next/navigation';
+import ToolDetailContent from '@/components/ToolDetailContent';
+import CommentSection from '@/components/CommentSection';
+import { AITool } from '@/types/AITool';
 
-const ToolDetailContent = dynamic(() => import('@/components/ToolDetailContent'), {
-  loading: () => <p>Loading tool details...</p>,
-})
-
-const CommentSection = dynamic(() => import('@/components/CommentSection'), {
-  loading: () => <p>Loading comments...</p>,
-  ssr: false,
-})
-
-type Props = {
-  params: { id: string }
+async function getToolDetails(id: string): Promise<AITool> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tools/${id}`, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Failed to fetch tool details');
+  }
+  return res.json();
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const id = params.id
-
-  await dbConnect()
-  const tool = await AITool.findById(id)
-
-  if (!tool) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  try {
+    const tool = await getToolDetails(params.id);
     return {
-      title: 'Tool Not Found',
-      description: 'The requested AI tool could not be found.',
-    }
-  }
-
-  return {
-    title: `${tool.name} - AI Tool Details`,
-    description: tool.description,
+      title: `${tool.name} - AI工具导航`,
+      description: tool.description,
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'AI工具详情 - AI工具导航',
+      description: 'AI工具的详细信息',
+    };
   }
 }
 
-export default async function ToolDetail({ params }: Props) {
-  const { id } = params;
+export default async function ToolPage({ params }: { params: { id: string } }) {
+  let tool: AITool;
 
-  await dbConnect()
-  const tool = await AITool.findById(id)
-
-  if (!tool) {
-    notFound()
+  try {
+    tool = await getToolDetails(params.id);
+  } catch (error) {
+    console.error('Error fetching tool details:', error);
+    notFound();
   }
 
   return (
-    <Layout title={`${tool.name} - AI Tool Details`}>
+    <main className="bg-gray-900 min-h-screen text-white">
       <div className="container mx-auto px-4 py-8">
         <Suspense fallback={<div>Loading tool details...</div>}>
-          <ToolDetailContent id={id} />
+          <ToolDetailContent tool={tool} />
         </Suspense>
         <Suspense fallback={<div>Loading comments...</div>}>
-          <CommentSection toolId={id} />
+          <CommentSection toolId={params.id} />
         </Suspense>
       </div>
-    </Layout>
+    </main>
   );
 }
