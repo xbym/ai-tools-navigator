@@ -41,30 +41,42 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 }
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  await dbConnect();
-  const toolId = params.id;
-  const tool = await AITool.findById(toolId).populate({
-    path: 'comments.user',
-    select: 'username avatarUrl'
-  });
+  try {
+    await dbConnect();
+    const toolId = params.id;
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = 10; // 每页评论数
+    const skip = (page - 1) * limit;
 
-  if (!tool) {
-    return NextResponse.json({ message: 'Tool not found' }, { status: 404 });
+    const tool = await AITool.findById(toolId)
+      .select('comments')
+      .slice('comments', [skip, limit])
+      .populate({
+        path: 'comments.user',
+        select: 'username avatarUrl'
+      })
+      .populate({
+        path: 'comments.replies.user',
+        select: 'username avatarUrl'
+      });
+
+    if (!tool) {
+      return NextResponse.json({ error: 'Tool not found' }, { status: 404 });
+    }
+
+    const totalComments = await AITool.findById(toolId).select('comments');
+    const totalPages = Math.ceil(totalComments.comments.length / limit);
+
+    return NextResponse.json({
+      comments: tool.comments,
+      currentPage: page,
+      totalPages: totalPages
+    });
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 });
   }
-
-  const comments = tool.comments.map((comment: any) => {
-    const commentObj = comment.toObject();
-    return {
-      ...commentObj,
-      user: {
-        id: commentObj.user?._id || commentObj.user,
-        username: commentObj.user?.username || 'Anonymous',
-        avatarUrl: commentObj.user?.avatarUrl || '/default-avatar.png'
-      }
-    };
-  });
-
-  return NextResponse.json({ comments });
 }
 
 // 添加新的路由处理函数

@@ -34,23 +34,32 @@ export default function SubmitToolPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
     try {
-      const response = await apiFetch('/api/tools', {
+      const token = localStorage.getItem('token'); // 假设令牌存储在 localStorage 中
+      const response = await fetch('/api/tools', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(toolData),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // 添加认证令牌
+        },
+        body: JSON.stringify({
+          ...toolData,
+          tags: toolData.tags.split(',').map(tag => tag.trim()),
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit tool');
+      if (response.ok) {
+        // 提交成功后的处理
+        router.push('/');
+      } else {
+        // 处理错误
+        const data = await response.json();
+        console.error('提交失败:', data.error);
+        // 显示错误消息给用户
       }
-
-      router.push('/');
-    } catch (err) {
-      setError('Error submitting tool. Please try again.');
-      console.error(err);
+    } catch (error) {
+      console.error('提交时出错:', error);
+      // 显示错误消息给用户
     }
   };
 

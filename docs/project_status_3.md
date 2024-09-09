@@ -60,3 +60,17 @@
     - 将其拆分为更小的专用 hooks：useReply、useReaction 和 useReport
     - 更新了 CommentSection 组件以使用新的 hooks
 109. 实现了评论的无限滚动加载，替代当前的分页方式
+110. 修复了评论系统的数据模型和API问题
+    - 更新了AITool模型的schema，正确定义了comments字段结构
+    - 修改了评论API路由，解决了populate错误
+    - 确保了comments.user和comments.replies.user字段可以正确填充
+111. 优化了评论获取API
+    - 实现了评论的分页加载
+    - 添加了评论总数和总页数的返回
+112. 完善了评论的CRUD操作
+    - 实现了添加评论的功能
+    - 添加了更新评论的API路由
+    - 实现了删除评论的功能，包括权限检查
+113. 增强了错误处理和日志记录
+    - 在评论相关的API中添加了更详细的错误日志
+    - 优化了错误响应，提供更具体的错误信息

@@ -1,48 +1,63 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-const ReplySchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true }, // 确保这行存在
-  content: { type: String, required: true },
-  avatarUrl: { type: String, default: '/default-avatar.png' },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const CommentSchema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String, required: true },
-  rating: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now },
-  replies: [ReplySchema],
-  likes: { type: Number, default: 0 },
-  dislikes: { type: Number, default: 0 },
-  userReactions: { type: Map, of: String },
-  reports: [{ type: Schema.Types.ObjectId, ref: 'User' }]
-});
-
 export interface IAITool extends Document {
-  // ... 其他字段 ...
-  ratings: number[];
+  name: string;
+  description: string;
+  category: string;
+  url: string;
+  tags: string[];
+  iconUrl: string;
+  screenshotUrl?: string;
+  ratings: {
+    userId: Schema.Types.ObjectId;
+    score: number;
+  }[];
+  comments: {
+    user: Schema.Types.ObjectId;
+    content: string;
+    rating: number;
+    createdAt: Date;
+    likes: number;
+    dislikes: number;
+    replies: {
+      user: Schema.Types.ObjectId;
+      content: string;
+      createdAt: Date;
+    }[];
+  }[];
+  viewCount: number;
   averageRating: number;
-  comments: mongoose.Types.DocumentArray<any>;
-  updateAverageRating: () => void;
+  createdBy: Schema.Types.ObjectId;
 }
 
 const AIToolSchema: Schema = new Schema({
-  // ... 其他字段 ...
-  ratings: [Number],
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  category: { type: String, required: true },
+  url: { type: String, required: true },
+  tags: [String],
+  iconUrl: { type: String, required: true },
+  screenshotUrl: String,
+  ratings: [{
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    score: Number
+  }],
+  comments: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    content: String,
+    rating: Number,
+    createdAt: { type: Date, default: Date.now },
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
+    replies: [{
+      user: { type: Schema.Types.ObjectId, ref: 'User' },
+      content: String,
+      createdAt: { type: Date, default: Date.now }
+    }]
+  }],
+  viewCount: { type: Number, default: 0 },
   averageRating: { type: Number, default: 0 },
-  comments: [CommentSchema]
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' }
 });
 
-AIToolSchema.methods.updateAverageRating = function(this: IAITool) {
-  const ratings = this.ratings;
-  const averageRating = ratings.length > 0 
-    ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length 
-    : 0;
-  this.averageRating = Number(averageRating.toFixed(2));
-};
-
-const AITool = mongoose.models.AITool || mongoose.model<IAITool>('AITool', AIToolSchema);
-
-export default AITool;
+export default mongoose.models.AITool || mongoose.model<IAITool>('AITool', AIToolSchema);

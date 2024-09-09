@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '@/models/User';
 import { logger } from '@/utils/logger';
 import mongoose from 'mongoose';
+import { verifyToken } from '@/utils/auth'; // 确保路径正确
 
 export function withAuth(handler: any) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
@@ -29,29 +30,24 @@ export function withAuth(handler: any) {
   };
 }
 
-export function authMiddleware(handler: Function) {
-  return async (req: NextRequest, ...args: any[]) => {
+export function authMiddleware(handler: (req: NextRequest & { user?: any }) => Promise<NextResponse<any>>) {
+  return async (request: NextRequest) => {
     try {
-      const token = req.headers.get('Authorization')?.split(' ')[1];
-      
+      const token = request.headers.get('Authorization')?.split(' ')[1];
       if (!token) {
-        logger.warn('No token provided');
-        return NextResponse.json({ message: '未提供认证令牌' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
 
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-        // @ts-ignore
-        req.user = decoded;
-      } catch (error) {
-        logger.error('Error verifying JWT:', error);
-        return NextResponse.json({ message: '无效的认证令牌' }, { status: 401 });
+      const user = await verifyToken(token);
+      if (!user) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
 
-      return handler(req, ...args);
+      // @ts-ignore
+      request.user = user;
+      return handler(request);
     } catch (error) {
-      logger.error('Error in authMiddleware:', error);
-      return NextResponse.json({ message: '服务器错误' }, { status: 500 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
   };
 }

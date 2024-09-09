@@ -1,6 +1,7 @@
 import React from 'react';
 import { Comment } from '@/types/AITool';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 
 interface CommentListProps {
   comments: Comment[];
@@ -26,9 +27,11 @@ export default function CommentList({
       {comments.map((comment) => (
         <div key={comment._id} className="bg-gray-700 p-3 sm:p-4 rounded-lg">
           <div className="flex items-center mb-2">
-            <img
+            <Image
               src={comment.user.avatarUrl || '/default-avatar.png'}
               alt={comment.user.username}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full mr-2"
             />
             <span className="font-bold text-white text-sm sm:text-base">{comment.user.username}</span>
