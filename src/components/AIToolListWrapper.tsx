@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { apiFetch } from '@/utils/api';
 import AIToolList from './AIToolList';
 import { AITool } from '@/types/AITool';
 
@@ -13,36 +14,34 @@ export default function AIToolListWrapper() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
 
-  const fetchTools = useCallback(async () => {
-    try {
-      const response = await fetch('/api/tools');
-      if (!response.ok) {
-        throw new Error('Failed to fetch tools');
-      }
-      const data = await response.json();
-      console.log('Fetched data:', data);
-      if (Array.isArray(data.tools)) {
+  useEffect(() => {
+    async function fetchTools() {
+      try {
+        const response = await apiFetch('/api/tools');
+        if (!response.ok) {
+          throw new Error('Failed to fetch tools');
+        }
+        const data = await response.json();
         setTools(data.tools);
-      } else {
-        throw new Error('Invalid data format');
+        setFilteredTools(data.tools);
+      } catch (err) {
+        setError('Error fetching tools');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching tools:', error);
-      setError('Failed to fetch tools. Please try again later.');
-    } finally {
-      setIsLoading(false);
     }
+
+    fetchTools();
   }, []);
 
   useEffect(() => {
-    fetchTools();
-  }, [fetchTools]);
-
-  useEffect(() => {
     const filtered = tools.filter((tool) => {
-      const matchesSearch = 
-        (tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-        (tool.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+      // 检查 tool 和 tool.name 是否存在
+      const matchesSearch = tool && tool.name
+        ? tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (tool.description?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        : false;
       const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
       const matchesTag = selectedTag ? tool.tags?.includes(selectedTag) ?? false : true;
 
@@ -52,8 +51,10 @@ export default function AIToolListWrapper() {
     setFilteredTools(filtered);
   }, [tools, searchTerm, selectedCategory, selectedTag]);
 
-  const categories = Array.from(new Set(tools.map((tool) => tool.category).filter(Boolean)));
-  const tags = Array.from(new Set(tools.flatMap((tool) => tool.tags || []).filter(Boolean)));
+  const categories = Array.from(new Set(tools.map((tool) => tool.category)));
+  const tags = Array.from(new Set(tools.flatMap((tool) => tool.tags)));
+
+  console.log('Rendering AIToolListWrapper, filteredTools:', filteredTools);
 
   if (isLoading) {
     return <div>Loading...</div>;
