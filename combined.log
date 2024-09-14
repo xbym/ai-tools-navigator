@@ -640,3 +640,5 @@
 {"level":"info","message":"New reply added to comment 66df1682065d47ed6ae244a4 for tool 66d7c5504d7f894acdbf139c","service":"ai-tools-navigator","timestamp":"2024-09-09T15:38:46.681Z"}
 {"level":"info","message":"User 66daf2def41cff37e220876b reacted to comment 66df1682065d47ed6ae244a4 for tool 66d7c5504d7f894acdbf139c with like","service":"ai-tools-navigator","timestamp":"2024-09-09T15:38:49.283Z"}
 {"level":"info","message":"User 66daf2def41cff37e220876b reacted to comment 66df1682065d47ed6ae244a4 for tool 66d7c5504d7f894acdbf139c with dislike","service":"ai-tools-navigator","timestamp":"2024-09-09T15:38:50.186Z"}
+{"level":"info","message":"New comment added to tool 66d7c5504d7f894acdbf139e","service":"ai-tools-navigator","timestamp":"2024-09-14T12:59:37.711Z"}
+{"level":"info","message":"New comment added to tool 66d7c5504d7f894acdbf139e","service":"ai-tools-navigator","timestamp":"2024-09-14T13:01:39.188Z"}

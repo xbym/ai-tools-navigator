@@ -1,14 +1,5 @@
 # .cursorrules 文件，用于规定智能读取和更新文档的规则
 
-# 规则1：每次读取文档时，最多读取150行
-max_lines_per_read: 150
-
-# 规则2：每次更新文档时，最多更新150行
-max_lines_per_update: 150
-
-# 规则3：按功能划分文档，确保每个文档内容独立且不超过150行
-split_by_function: true
-
 # 规则4：文档更新时，优先更新与当前开发任务相关的文档
 priority_update: true
 
